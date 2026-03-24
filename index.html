@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gutenberg Text Cleaner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #f2efe6;
+  --surface:   #faf9f4;
+  --surface2:  #e8e4d8;
+  --surface3:  #dedad0;
+  --border:    #ccc8b8;
+  --border2:   #b8b3a0;
+  --text:      #1a1810;
+  --text2:     #5a5545;
+  --text3:     #9a9480;
+  --accent:    #3d6b50;
+  --accent2:   #2a4d38;
+  --accent-bg: #e4ede7;
+  --link:      #2c5090;
+  --link-bg:   #eaf0f8;
+  --warn-bg:   #fdf4da;
+  --warn:      #6b4f08;
+  --warn-bdr:  #ddb830;
+  --ok-bg:     #e6f0e9;
+  --ok:        #1f5c30;
+  --err-bg:    #fdecec;
+  --err:       #892020;
+  --ch-hover:  #edeae0;
+  --ch-active: #dff0e4;
+  --ch-active-bdr: #3d6b50;
+  --serif-display: 'Playfair Display', Georgia, serif;
+  --serif-body:    'Source Serif 4', Georgia, serif;
+  --mono:          'JetBrains Mono', 'Courier New', monospace;
+  --sans:          system-ui, -apple-system, sans-serif;
+  --radius:   8px;
+  --radius-lg:12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #141210;
+    --surface:   #1e1c18;
+    --surface2:  #272420;
+    --surface3:  #302e28;
+    --border:    #383430;
+    --border2:   #4a4640;
+    --text:      #eae6d8;
+    --text2:     #9a9080;
+    --text3:     #605a50;
+    --accent:    #6aaa80;
+    --accent2:   #88c49a;
+    --accent-bg: #142018;
+    --link:      #7aaae0;
+    --link-bg:   #10182a;
+    --warn-bg:   #1e1808;
+    --warn:      #c4a030;
+    --warn-bdr:  #7a6010;
+    --ok-bg:     #0e1e14;
+    --ok:        #70c088;
+    --err-bg:    #1e0e0e;
+    --err:       #d47070;
+    --ch-hover:  #28261e;
+    --ch-active: #142018;
+    --ch-active-bdr: #6aaa80;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: .9rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 1rem;
+}
+.app-header h1 {
+  font-family: var(--serif-display);
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  color: var(--text);
+}
+.app-header h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.header-tag {
+  font-size: .7rem;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+
+/* ── LAYOUT ── */
+.app-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Step blocks */
+.step-block {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.step-num {
+  width: 20px; height: 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: .62rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.field-lbl {
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: block;
+  margin-bottom: .3rem;
+}
+input[type=url], textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .5rem .7rem;
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+  line-height: 1.4;
+}
+input[type=url]:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 90px; }
+
+.open-link {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem .8rem;
+  background: var(--link-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--link);
+  font-size: .76rem;
+  transition: border-color .15s;
+}
+.open-link:hover { border-color: var(--link); }
+.open-link .ol-main { font-weight: 600; }
+.open-link .ol-url {
+  font-family: var(--mono);
+  font-size: .64rem;
+  color: var(--text3);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.open-link.hidden { display: none; }
+
+/* Notices */
+.note {
+  border-radius: var(--radius);
+  padding: .55rem .8rem;
+  font-size: .76rem;
+  line-height: 1.5;
+  display: none;
+}
+.note.show { display: block; }
+.note-warn { background: var(--warn-bg); border: 1px solid var(--warn-bdr); color: var(--warn); }
+.note-ok   { background: var(--ok-bg);   color: var(--ok); }
+.note-err  { background: var(--err-bg);  color: var(--err); }
+.note-info { background: var(--link-bg); color: var(--link); border: 1px solid var(--border); }
+
+/* Divider */
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .7rem;
+  color: var(--text3);
+}
+.or-divider::before, .or-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: .5rem 1rem;
+  transition: background .12s, color .12s, border-color .12s;
+  white-space: nowrap;
+  font-family: var(--sans);
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  width: 100%;
+}
+.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border-color: var(--border);
+}
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn-ghost:disabled { opacity: .35; cursor: not-allowed; }
+.btn-sm { padding: .35rem .75rem; font-size: .74rem; }
+
+/* Options */
+.opt-section-head {
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding-bottom: .35rem;
+  border-bottom: 1px solid var(--border);
+}
+.opt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  font-size: .8rem;
+  cursor: pointer;
+  padding: .25rem 0;
+  color: var(--text);
+}
+.opt-row input[type=checkbox] {
+  margin-top: 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.opt-row small { display: block; font-size: .69rem; color: var(--text3); margin-top: 1px; }
+
+/* Spinner */
+.spinner {
+  width: 13px; height: 13px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Chapter list */
+.chapter-list-panel {
+  background: var(--surface2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.ch-panel-head {
+  padding: .8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  flex-shrink: 0;
+}
+.ch-panel-title {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.ch-panel-count {
+  font-size: .7rem;
+  color: var(--text3);
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .1rem .5rem;
+}
+.ch-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+}
+.ch-item {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .1s;
+  position: relative;
+}
+.ch-item:hover { background: var(--ch-hover); }
+.ch-item.active {
+  background: var(--ch-active);
+  border-left: 3px solid var(--ch-active-bdr);
+}
+.ch-item.active .ch-item-inner { padding-left: calc(.85rem - 3px); }
+.ch-item-inner {
+  flex: 1;
+  padding: .6rem .85rem;
+  min-width: 0;
+}
+.ch-item-num {
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.ch-item-title {
+  font-size: .78rem;
+  color: var(--text);
+  font-family: var(--serif-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.ch-item-words {
+  font-size: .65rem;
+  color: var(--text3);
+  margin-top: 2px;
+}
+.ch-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: .8rem;
+  color: var(--text3);
+  line-height: 1.6;
+}
+
+/* Chapter export bar below list */
+.ch-export-bar {
+  padding: .75rem 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.ch-export-label {
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.ch-export-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .4rem;
+}
+
+/* ── READER / PREVIEW ── */
+.reader-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+.reader-toolbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: .7rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+.reader-title {
+  font-family: var(--serif-display);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.reader-meta {
+  font-size: .7rem;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.reader-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+.reader-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.5rem 3rem;
+}
+.reader-text {
+  font-family: var(--serif-body);
+  font-size: .95rem;
+  line-height: 1.85;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 72ch;
+  margin: 0 auto;
+}
+.reader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: .75rem;
+  color: var(--text3);
+  text-align: center;
+  padding: 3rem;
+}
+.reader-placeholder svg { opacity: .18; }
+.reader-placeholder p { font-size: .85rem; max-width: 280px; line-height: 1.6; }
+.reader-placeholder strong { color: var(--text2); }
+
+/* ── FOOTER ── */
+.app-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: .45rem 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .7rem;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+.app-footer a { color: var(--accent); text-decoration: none; }
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 900px) {
+  .app-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .sidebar { max-height: 50vh; overflow-y: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .main-content { grid-template-columns: 1fr; }
+  .chapter-list-panel { max-height: 250px; border-right: none; border-bottom: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Gutenberg <em>Text Cleaner</em></h1>
+  <span class="header-tag">Chapter Splitter &amp; Exporter</span>
+</header>
+
+<div class="app-body">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+  <div class="sidebar-scroll">
+
+    <!-- Step 1: URL -->
+    <div class="step-block">
+      <div class="step-head"><div class="step-num">1</div><div class="step-label">Enter Gutenberg URL</div></div>
+      <label class="field-lbl">Book URL (any Gutenberg link format)</label>
+      <input type="url" id="urlInput" placeholder="https://www.gutenberg.org/ebooks/84" oninput="onUrlInput()">
+      <a class="open-link hidden" id="openLink" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div style="flex:1;min-width:0">
+          <div class="ol-main">Open plain-text file</div>
+          <div class="ol-url" id="openLinkUrl"></div>
+        </div>
+      </a>
+      <button class="btn btn-primary" id="fetchBtn" onclick="doFetch()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+        Fetch &amp; Clean
+      </button>
+      <div class="note note-info show" style="font-size:.72rem">
+        Fetching works when hosted on <strong>GitHub Pages</strong>. If running locally, use the paste option below.
+      </div>
+      <div class="note" id="fetchNote"></div>
+    </div>
+
+    <div class="or-divider">or paste manually</div>
+
+    <!-- Step 2: Paste -->
+    <div class="step-block">
+      <div class="step-head"><div class="step-num">2</div><div class="step-label">Paste raw text</div></div>
+      <label class="field-lbl">Full Gutenberg plain text</label>
+      <textarea id="pasteInput" placeholder="Paste the full .txt content here…" oninput="onPasteInput()"></textarea>
+      <div class="note" id="pasteNote"></div>
+      <button class="btn btn-primary" onclick="doCleanPaste()">Clean &amp; Split Chapters</button>
+      <div class="note note-err" id="pasteErr"></div>
+    </div>
+
+    <!-- Step 3: Options -->
+    <div class="step-block">
+      <div class="step-head"><div class="step-num">3</div><div class="step-label">Options</div></div>
+
+      <div class="opt-section-head" style="margin-bottom:.5rem">Cleaning</div>
+      <label class="opt-row"><input type="checkbox" id="optH" checked><div>Remove header<small>Everything before the text begins</small></div></label>
+      <label class="opt-row"><input type="checkbox" id="optF" checked><div>Remove footer<small>License &amp; end-of-file notices</small></div></label>
+      <label class="opt-row"><input type="checkbox" id="optP" checked><div>Remove "Produced by" lines</label>
+      <label class="opt-row"><input type="checkbox" id="optB" checked><div>Collapse excess blank lines</div></label>
+
+      <div class="opt-section-head" style="margin:.6rem 0 .5rem">Chapter splitting</div>
+      <label class="opt-row"><input type="checkbox" id="optChapter" checked><div>Auto-detect chapters<small>Matches CHAPTER I, Chapter 1, PART II, etc.</small></div></label>
+      <label class="opt-row"><input type="checkbox" id="optKeepHeading" checked><div>Include heading in each chapter file</div></label>
+
+      <div class="opt-section-head" style="margin:.6rem 0 .5rem">Export</div>
+      <label class="opt-row"><input type="checkbox" id="optRtfBold" checked><div>Bold chapter headings in RTF<small>Rich text export only</small></div></label>
+      <label class="opt-row"><input type="checkbox" id="optBookTitle" checked><div>Include book title in RTF header<small>Added as first line if detected</small></div></label>
+    </div>
+
+  </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main-content">
+
+    <!-- Chapter list -->
+    <div class="chapter-list-panel">
+      <div class="ch-panel-head">
+        <span class="ch-panel-title">Chapters</span>
+        <span class="ch-panel-count" id="chCount">—</span>
+      </div>
+      <ul class="ch-list" id="chList">
+        <li class="ch-empty">Process a book to see chapters here.</li>
+      </ul>
+      <div class="ch-export-bar" id="chExportBar" style="display:none">
+        <div class="ch-export-label">Export all chapters</div>
+        <div class="ch-export-btns">
+          <button class="btn btn-ghost btn-sm" onclick="exportAll('txt')">All as .txt</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportAll('rtf')">All as .rtf</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportAll('zip-txt')" id="zipBtn">Download .zip (txt)</button>
+      </div>
+    </div>
+
+    <!-- Reader -->
+    <div class="reader-panel">
+      <div class="reader-toolbar" id="readerToolbar">
+        <div class="reader-title" id="readerTitle">No chapter selected</div>
+        <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0">
+          <div class="reader-meta" id="readerMeta"></div>
+          <div class="reader-actions">
+            <button class="btn btn-ghost btn-sm" id="expTxtBtn" onclick="exportChapter('txt')" disabled>Export .txt</button>
+            <button class="btn btn-ghost btn-sm" id="expRtfBtn" onclick="exportChapter('rtf')" disabled>Export .rtf</button>
+          </div>
+        </div>
+      </div>
+      <div class="reader-body">
+        <div id="readerContent">
+          <div class="reader-placeholder">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            <p><strong>Fetch or paste a Gutenberg book</strong> to split it into chapters and preview them here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="app-footer">
+  <span>All processing in-browser · nothing sent anywhere</span>
+  <span><a href="https://www.gutenberg.org" target="_blank">Project Gutenberg</a> · <a href="https://github.com" target="_blank">Host on GitHub Pages</a></span>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────
+   State
+───────────────────────────────────────────── */
+let chapters = [];      // [{title, num, text, words}]
+let activeIdx = -1;
+let bookTitle = '';
+
+/* ─────────────────────────────────────────────
+   URL resolution
+───────────────────────────────────────────── */
+function resolveTextUrls(raw) {
+  raw = raw.trim().replace(/\/$/, '');
+  if (/\.txt(\?|#|$)/i.test(raw)) return [raw];
+  let n = null;
+  const m = raw.match(/(?:ebooks|epub|files)\/(\d+)/);
+  if (m) n = m[1];
+  else { const m2 = raw.match(/^(\d+)$/); if (m2) n = m2[1]; }
+  if (n) return [
+    `https://www.gutenberg.org/files/${n}/${n}-0.txt`,
+    `https://www.gutenberg.org/files/${n}/${n}.txt`,
+    `https://www.gutenberg.org/cache/epub/${n}/pg${n}.txt`,
+  ];
+  return [raw];
+}
+
+function onUrlInput() {
+  const val = document.getElementById('urlInput').value.trim();
+  const link = document.getElementById('openLink');
+  if (!val) { link.classList.add('hidden'); return; }
+  const urls = resolveTextUrls(val);
+  link.href = urls[0];
+  document.getElementById('openLinkUrl').textContent = urls[0];
+  link.classList.remove('hidden');
+}
+
+/* ─────────────────────────────────────────────
+   Fetch
+───────────────────────────────────────────── */
+async function doFetch() {
+  const raw = document.getElementById('urlInput').value.trim();
+  if (!raw) { showNote('fetchNote', 'err', 'Enter a Gutenberg URL first.'); return; }
+
+  const btn = document.getElementById('fetchBtn');
+  btn.innerHTML = '<div class="spinner"></div> Fetching…';
+  btn.disabled = true;
+  showNote('fetchNote', 'info', '');
+
+  const urls = resolveTextUrls(raw);
+  let text = null;
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+      if (!res.ok) continue;
+      const t = await res.text();
+      if (t && t.length > 500) { text = t; break; }
+    } catch(e) { continue; }
+  }
+
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg> Fetch &amp; Clean';
+  btn.disabled = false;
+
+  if (!text) {
+    showNote('fetchNote', 'err', 'Could not fetch. Try the "Open plain-text file" link above, copy all, and paste below.');
+    return;
+  }
+  process(text);
+}
+
+/* ─────────────────────────────────────────────
+   Paste path
+───────────────────────────────────────────── */
+function onPasteInput() {
+  const t = document.getElementById('pasteInput').value;
+  const note = document.getElementById('pasteNote');
+  if (!t.trim()) { note.className = 'note'; return; }
+  const w = t.trim().split(/\s+/).length;
+  showNote('pasteNote', 'ok', `✓ ${w.toLocaleString()} words pasted`);
+}
+
+function doCleanPaste() {
+  const raw = document.getElementById('pasteInput').value;
+  if (!raw.trim()) { showNote('pasteErr', 'err', 'Nothing pasted yet.'); return; }
+  showNote('pasteErr', '', '');
+  process(raw);
+}
+
+/* ─────────────────────────────────────────────
+   Core processing
+───────────────────────────────────────────── */
+function process(raw) {
+  let text = raw;
+
+  // Detect book title early (before stripping)
+  const titleMatch = text.match(/^Title:\s*(.+)$/m);
+  bookTitle = titleMatch ? titleMatch[1].trim() : '';
+
+  // ── Strip header ──
+  if (document.getElementById('optH').checked) {
+    const hm = text.match(/\*{3}\s*START OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG[^\n]*/i);
+    if (hm) {
+      text = text.slice(hm.index + hm[0].length);
+      const nl = text.indexOf('\n'); if (nl !== -1) text = text.slice(nl + 1);
+    } else {
+      // Fallback: drop until 2 consecutive blank lines
+      const lines = text.split('\n');
+      let si = 0, blanks = 0;
+      for (let i = 0; i < lines.length; i++) {
+        blanks = lines[i].trim() === '' ? blanks + 1 : 0;
+        if (blanks >= 2) { si = i + 1; break; }
+      }
+      text = lines.slice(si).join('\n');
+    }
+  }
+
+  // ── Strip footer ──
+  if (document.getElementById('optF').checked) {
+    const fps = [
+      /\*{3}\s*END OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG/i,
+      /End of (?:the |this )?Project Gutenberg/i,
+    ];
+    for (const p of fps) {
+      const m = text.match(p); if (m) { text = text.slice(0, m.index); break; }
+    }
+  }
+
+  // ── Remove produced-by ──
+  if (document.getElementById('optP').checked) {
+    text = text.replace(/^[ \t]*(Produced|Transcribed|Prepared|Digitized) by[^\n]*(\n[^\n]+){0,2}\n?/gim, '');
+  }
+
+  // ── Collapse blanks ──
+  if (document.getElementById('optB').checked) {
+    text = text.replace(/\n{4,}/g, '\n\n\n');
+  }
+
+  text = text.trim();
+
+  // ── Split into chapters ──
+  if (document.getElementById('optChapter').checked) {
+    chapters = splitChapters(text);
+  } else {
+    chapters = [{ title: bookTitle || 'Full Text', num: 0, text: text, words: countWords(text) }];
+  }
+
+  renderChapterList();
+  if (chapters.length > 0) selectChapter(0);
+}
+
+/* ─────────────────────────────────────────────
+   Chapter splitting
+───────────────────────────────────────────── */
+// Matches headings like:
+//  CHAPTER I / Chapter 1 / CHAPTER THE FIRST
+//  PART I / PART ONE / BOOK I
+//  I. / II. (standalone Roman numerals as section breaks)
+//  Standalone lines that are ALL CAPS and short (likely section titles)
+const CHAPTER_RE = /^[ \t]*((?:CHAPTER|PART|BOOK|SECTION|ACT|SCENE|VOLUME|PROLOGUE|EPILOGUE|INTRODUCTION|PREFACE|APPENDIX)(?:[ \t]+(?:[IVXLCDM]+|[0-9]+|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE|FIRST|SECOND|THIRD|FOURTH|FIFTH|THE\s+FIRST|THE\s+SECOND))?(?:\.?[ \t]*[-–—:]?[ \t]*[^\n]{0,80})?)[ \t]*$/im;
+
+function splitChapters(text) {
+  const lines = text.split('\n');
+  const splits = []; // indices of chapter-start lines
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    // Must be preceded by a blank line (or be at start)
+    const prevBlank = i === 0 || lines[i - 1].trim() === '';
+    if (!prevBlank) continue;
+
+    // Must be followed by a blank line (or next meaningful line)
+    const nextBlank = i + 1 >= lines.length || lines[i + 1].trim() === '';
+
+    if (CHAPTER_RE.test(line) && nextBlank) {
+      splits.push(i);
+    }
+  }
+
+  // If we found no chapter headings, return the whole text as one chunk
+  if (splits.length === 0) {
+    return [{ title: bookTitle || 'Full Text', num: 1, text: text, words: countWords(text) }];
+  }
+
+  // Text before the first chapter heading (could be preface/intro without heading)
+  const result = [];
+  const firstSplit = splits[0];
+  if (firstSplit > 0) {
+    const before = lines.slice(0, firstSplit).join('\n').trim();
+    if (before.length > 100) {
+      result.push({ title: 'Front Matter', num: 0, text: before, words: countWords(before) });
+    }
+  }
+
+  // Each chapter: from its heading line to the next split (exclusive)
+  for (let s = 0; s < splits.length; s++) {
+    const start = splits[s];
+    const end   = s + 1 < splits.length ? splits[s + 1] : lines.length;
+    const chunkLines = lines.slice(start, end);
+    const heading = chunkLines[0].trim();
+    let body = chunkLines.join('\n').trim();
+
+    if (!document.getElementById('optKeepHeading').checked) {
+      // Strip the heading line(s) from the body
+      const nl = body.indexOf('\n');
+      body = nl !== -1 ? body.slice(nl + 1).trim() : '';
+    }
+
+    if (body.length < 10) continue;
+
+    result.push({
+      title: heading,
+      num: s + 1,
+      text: body,
+      words: countWords(body),
+    });
+  }
+
+  return result;
+}
+
+/* ─────────────────────────────────────────────
+   Chapter list UI
+───────────────────────────────────────────── */
+function renderChapterList() {
+  const list = document.getElementById('chList');
+  const countEl = document.getElementById('chCount');
+  const exportBar = document.getElementById('chExportBar');
+
+  countEl.textContent = chapters.length;
+  exportBar.style.display = chapters.length ? '' : 'none';
+
+  list.innerHTML = '';
+  chapters.forEach((ch, i) => {
+    const li = document.createElement('li');
+    li.className = 'ch-item';
+    li.innerHTML = `
+      <div class="ch-item-inner">
+        <div class="ch-item-num">${ch.num === 0 ? 'Preamble' : 'Ch. ' + ch.num}</div>
+        <div class="ch-item-title">${escHtml(ch.title)}</div>
+        <div class="ch-item-words">${ch.words.toLocaleString()} words</div>
+      </div>`;
+    li.addEventListener('click', () => selectChapter(i));
+    list.appendChild(li);
+  });
+}
+
+function selectChapter(idx) {
+  activeIdx = idx;
+  // Update active state
+  document.querySelectorAll('.ch-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  const ch = chapters[idx];
+  // Toolbar
+  document.getElementById('readerTitle').textContent = ch.title;
+  document.getElementById('readerMeta').textContent = `${ch.words.toLocaleString()} words · ${ch.text.length.toLocaleString()} chars`;
+  // Enable export buttons
+  document.getElementById('expTxtBtn').disabled = false;
+  document.getElementById('expRtfBtn').disabled = false;
+  // Content
+  const content = document.getElementById('readerContent');
+  content.innerHTML = `<div class="reader-text">${escHtml(ch.text)}</div>`;
+}
+
+/* ─────────────────────────────────────────────
+   Export helpers
+───────────────────────────────────────────── */
+function chapterFilename(ch, ext) {
+  const slug = ch.title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 50);
+  const prefix = ch.num === 0 ? '00-preamble' : String(ch.num).padStart(2, '0');
+  return `${prefix}-${slug}.${ext}`;
+}
+
+function toRtf(ch) {
+  const bold = document.getElementById('optRtfBold').checked;
+  const showTitle = document.getElementById('optBookTitle').checked;
+
+  let content = '';
+  if (showTitle && bookTitle) {
+    content += `{\\pard\\sb240\\sa120 {\\b\\fs28 ${rtfEsc(bookTitle)}}\\par}\n`;
+  }
+  if (bold) {
+    content += `{\\pard\\sb240\\sa120 {\\b\\fs24 ${rtfEsc(ch.title)}}\\par}\n`;
+  } else {
+    content += `{\\pard\\sb240\\sa120 {\\fs24 ${rtfEsc(ch.title)}}\\par}\n`;
+  }
+  // Body paragraphs (split on blank lines)
+  const paras = ch.text.split(/\n{2,}/);
+  for (const p of paras) {
+    const line = p.trim().replace(/\n/g, ' ');
+    if (line) content += `{\\pard\\sa120 ${rtfEsc(line)}\\par}\n`;
+  }
+
+  return `{\\rtf1\\ansi\\deff0\n{\\fonttbl{\\f0\\froman\\fcharset0 Times New Roman;}}\n{\\colortbl ;\\red0\\green0\\blue0;}\n\\f0\\fs24\\cf1\n${content}}`;
+}
+
+function rtfEsc(s) {
+  return s
+    .replace(/\\/g, '\\\\')
+    .replace(/{/g, '\\{')
+    .replace(/}/g, '\\}')
+    .replace(/[^\x00-\x7F]/g, c => `\\u${c.charCodeAt(0)}?`);
+}
+
+function toTxt(ch) {
+  return ch.title + '\n' + '─'.repeat(Math.min(ch.title.length, 60)) + '\n\n' + ch.text;
+}
+
+function exportChapter(fmt) {
+  if (activeIdx < 0 || !chapters[activeIdx]) return;
+  const ch = chapters[activeIdx];
+  const content = fmt === 'rtf' ? toRtf(ch) : toTxt(ch);
+  const mime = fmt === 'rtf' ? 'application/rtf' : 'text/plain';
+  download(chapterFilename(ch, fmt), content, mime);
+}
+
+function exportAll(fmt) {
+  if (!chapters.length) return;
+
+  if (fmt === 'zip-txt') {
+    // No JSZip available; fall back to sequential download with a small delay
+    chapters.forEach((ch, i) => {
+      setTimeout(() => {
+        download(chapterFilename(ch, 'txt'), toTxt(ch), 'text/plain');
+      }, i * 200);
+    });
+    return;
+  }
+
+  chapters.forEach((ch, i) => {
+    setTimeout(() => {
+      const content = fmt === 'rtf' ? toRtf(ch) : toTxt(ch);
+      const mime = fmt === 'rtf' ? 'application/rtf' : 'text/plain';
+      download(chapterFilename(ch, fmt), content, mime);
+    }, i * 150);
+  });
+}
+
+function download(name, content, mime) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+/* ─────────────────────────────────────────────
+   Utilities
+───────────────────────────────────────────── */
+function countWords(t) { return t.trim().split(/\s+/).filter(Boolean).length; }
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showNote(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!msg) { el.className = 'note'; return; }
+  el.className = `note note-${type} show`;
+  el.textContent = msg;
+}
+</script>
+</body>
+</html>
