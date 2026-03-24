@@ -554,7 +554,7 @@ textarea { resize: vertical; min-height: 90px; }
         Fetch &amp; Clean
       </button>
       <div class="note note-info show" style="font-size:.72rem">
-        Fetching works when hosted on <strong>GitHub Pages</strong>. If running locally, use the paste option below.
+        Tries direct fetch first, then falls back through 3 CORS proxies automatically. Works locally and on GitHub Pages.
       </div>
       <div class="note" id="fetchNote"></div>
     </div>
@@ -684,36 +684,68 @@ function onUrlInput() {
 }
 
 /* ─────────────────────────────────────────────
-   Fetch
+   Fetch — direct first, then CORS proxy cascade
 ───────────────────────────────────────────── */
+const FETCH_BTN_IDLE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg> Fetch &amp; Clean';
+
+async function tryFetch(url, timeoutMs = 18000) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const t = await res.text();
+  if (!t || t.length < 500) throw new Error('Response too short');
+  // Reject obvious HTML error pages
+  if (t.trimStart().startsWith('<!') || t.trimStart().startsWith('<html')) throw new Error('Got HTML, not text');
+  return t;
+}
+
 async function doFetch() {
   const raw = document.getElementById('urlInput').value.trim();
   if (!raw) { showNote('fetchNote', 'err', 'Enter a Gutenberg URL first.'); return; }
 
   const btn = document.getElementById('fetchBtn');
-  btn.innerHTML = '<div class="spinner"></div> Fetching…';
-  btn.disabled = true;
-  showNote('fetchNote', 'info', '');
+  const setStatus = (msg) => {
+    btn.innerHTML = `<div class="spinner"></div> ${msg}`;
+    btn.disabled = true;
+  };
+  const resetBtn = () => {
+    btn.innerHTML = FETCH_BTN_IDLE;
+    btn.disabled = false;
+  };
 
-  const urls = resolveTextUrls(raw);
-  let text = null;
+  showNote('fetchNote', '', '');
+  const textUrls = resolveTextUrls(raw);
 
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
-      if (!res.ok) continue;
-      const t = await res.text();
-      if (t && t.length > 500) { text = t; break; }
-    } catch(e) { continue; }
+  // Build a list of attempts: direct + two proxies, for each candidate text URL
+  // We try direct first (works on GitHub Pages / any HTTPS host),
+  // then fall through to proxies for local use.
+  const attempts = [];
+  for (const u of textUrls) {
+    attempts.push({ label: 'Connecting…',        url: u });
+    attempts.push({ label: 'Trying proxy 1…',    url: `https://corsproxy.io/?${encodeURIComponent(u)}` });
+    attempts.push({ label: 'Trying proxy 2…',    url: `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` });
+    attempts.push({ label: 'Trying proxy 3…',    url: `https://thingproxy.freeboard.io/fetch/${u}` });
   }
 
-  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg> Fetch &amp; Clean';
-  btn.disabled = false;
+  let text = null;
+  for (const attempt of attempts) {
+    setStatus(attempt.label);
+    try {
+      text = await tryFetch(attempt.url);
+      break;
+    } catch(e) {
+      continue;
+    }
+  }
+
+  resetBtn();
 
   if (!text) {
-    showNote('fetchNote', 'err', 'Could not fetch. Try the "Open plain-text file" link above, copy all, and paste below.');
+    showNote('fetchNote', 'err',
+      'All fetch attempts failed. Click "Open plain-text file" above → select all → copy → paste in Step 2.');
     return;
   }
+
+  showNote('fetchNote', 'ok', '✓ Fetched successfully');
   process(text);
 }
 
