@@ -554,7 +554,7 @@ textarea { resize: vertical; min-height: 90px; }
         Fetch &amp; Clean
       </button>
       <div class="note note-info show" style="font-size:.72rem">
-        Tries direct fetch first, then falls back through 3 CORS proxies automatically. Works locally and on GitHub Pages.
+        Tries your <strong>Cloudflare Worker</strong> first (if configured), then direct, then 3 public CORS proxies. Set <code>WORKER_URL</code> in the script for the most reliable fetching.
       </div>
       <div class="note" id="fetchNote"></div>
     </div>
@@ -651,6 +651,10 @@ textarea { resize: vertical; min-height: 90px; }
 /* ─────────────────────────────────────────────
    State
 ───────────────────────────────────────────── */
+// ── Set this after deploying your Cloudflare Worker ──
+// e.g. 'https://gutenberg-proxy.yourname.workers.dev'
+const WORKER_URL = 'https://gutenberg-proxy.jacobdsiler.workers.dev/';
+
 let chapters = [];      // [{title, num, text, words}]
 let activeIdx = -1;
 let bookTitle = '';
@@ -715,11 +719,12 @@ async function doFetch() {
   showNote('fetchNote', '', '');
   const textUrls = resolveTextUrls(raw);
 
-  // Build a list of attempts: direct + two proxies, for each candidate text URL
-  // We try direct first (works on GitHub Pages / any HTTPS host),
-  // then fall through to proxies for local use.
+  // Build attempt list — worker first (if configured), then direct, then public proxies
   const attempts = [];
   for (const u of textUrls) {
+    if (WORKER_URL) {
+      attempts.push({ label: 'Fetching via worker…', url: `${WORKER_URL.replace(/\/$/, '')}/?url=${encodeURIComponent(u)}` });
+    }
     attempts.push({ label: 'Connecting…',        url: u });
     attempts.push({ label: 'Trying proxy 1…',    url: `https://corsproxy.io/?${encodeURIComponent(u)}` });
     attempts.push({ label: 'Trying proxy 2…',    url: `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` });
