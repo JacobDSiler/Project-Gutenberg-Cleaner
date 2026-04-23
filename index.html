@@ -834,122 +834,220 @@ function process(raw) {
 }
 
 /* ─────────────────────────────────────────────
-   Chapter splitting — Contents-first strategy
+   Chapter splitting — Contents-first, flexible matching
 ───────────────────────────────────────────── */
 
-// ── 1. Extract titles from a CONTENTS / TABLE OF CONTENTS block ──
-// Handles both multi-line lists and single-line space/tab-separated lists.
-function extractContents(text) {
-  // Find the contents heading
-  const contentsStart = text.search(/^[ \t]*(?:TABLE OF )?CONTENTS[ \t]*$/im);
-  if (contentsStart === -1) return null;
+// Shared regex building blocks for heading detection.
+const HEADING_KEYWORD_SRC = '(?:CHAPTER|CHAP|PART|BOOK|SECTION|ACT|SCENE|VOLUME|VOL|LETTER|CANTO|STAVE|PROLOGUE|EPILOGUE|INTRODUCTION|PREFACE|APPENDIX|FOREWORD|AFTERWORD)';
+const HEADING_NUMBER_SRC  = '(?:[IVXLCDM]+|[0-9]{1,4}|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE|THIRTEEN|FOURTEEN|FIFTEEN|SIXTEEN|SEVENTEEN|EIGHTEEN|NINETEEN|TWENTY|THIRTY|FORTY|FIFTY|FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINTH|TENTH|ELEVENTH|TWELFTH)';
 
-  // Grab up to 200 lines after the heading to find the list
-  const after = text.slice(contentsStart);
-  const lines = after.split('\n');
+function reEsc(s)  { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function flexWs(s) { return reEsc(s).replace(/\s+/g, '\\s+'); }
+
+// ── 1. Extract titles from a CONTENTS / TABLE OF CONTENTS block ──
+// Also returns the line index where the TOC block ends, so body-scanning
+// can skip past it rather than re-matching the TOC entries themselves.
+function extractContents(text) {
+  const lines = text.split('\n');
+
+  let contentsLine = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^[ \t]*(?:TABLE OF )?CONTENTS[ \t]*\.?[ \t]*$/i.test(lines[i])) {
+      contentsLine = i;
+      break;
+    }
+  }
+  if (contentsLine === -1) return null;
 
   const titles = [];
   let foundAny = false;
   let blankRun = 0;
+  let lastEntryLine = contentsLine;
 
-  for (let i = 1; i < Math.min(lines.length, 250); i++) {
-    const raw = lines[i];
-    const trimmed = raw.trim();
+  const limit = Math.min(lines.length, contentsLine + 250);
+  for (let i = contentsLine + 1; i < limit; i++) {
+    const trimmed = lines[i].trim();
 
     if (!trimmed) {
       blankRun++;
-      // Two blank lines after we've already found entries = end of contents
       if (foundAny && blankRun >= 2) break;
       continue;
     }
     blankRun = 0;
 
-    // Stop if we hit something that looks like body text (long prose line)
-    if (foundAny && trimmed.length > 120 && !trimmed.match(/^[A-Z\d]/)) break;
+    // Stop if we hit body-looking prose.
+    if (foundAny && trimmed.length > 120 && !/^[A-Z\d]/.test(trimmed)) break;
 
-    // A contents entry: short line, possibly with a page number at the end
-    // Strip trailing page numbers like "  12" or "  . . . 12" or " .... 12"
+    // Strip trailing page numbers like "  12" or " .... 12"
     const entry = trimmed
-      .replace(/[\s.·]+\d+\s*$/, '')  // trailing dots + page number
-      .replace(/\s{2,}\d+\s*$/, '')   // trailing whitespace + page number
+      .replace(/[\s.·]+\d+\s*$/, '')
+      .replace(/\s{2,}\d+\s*$/, '')
       .trim();
 
     if (!entry) continue;
-
-    // Skip lines that are just "CONTENTS" or "TABLE OF CONTENTS" themselves
     if (/^(?:TABLE OF )?CONTENTS$/i.test(entry)) continue;
 
-    // Single-line format: "Letter 1  Letter 2  Letter 3  ..." — split on 2+ spaces
-    if (!foundAny && entry.match(/\s{2,}/)) {
+    // Single-line contents like "Letter 1  Letter 2  ..."
+    if (!foundAny && /\s{2,}/.test(entry)) {
       const parts = entry.split(/\s{2,}/).map(s => s.trim()).filter(Boolean);
-      // Only treat as single-line contents if all parts look like section headings
       if (parts.length >= 2 && parts.every(p => p.length < 80)) {
         parts.forEach(p => titles.push(p));
         foundAny = true;
-        // Peek ahead — if next non-blank line also looks like more single-line entries, keep going
+        lastEntryLine = i;
         continue;
       }
     }
 
-    // Standard one-entry-per-line format
-    if (entry.length < 100) {
+    if (entry.length < 150) {
       titles.push(entry);
       foundAny = true;
+      lastEntryLine = i;
     }
   }
 
-  return titles.length >= 2 ? titles : null;
+  if (titles.length < 2) return null;
+  return { titles, tocEndLineIdx: lastEntryLine + 1 };
 }
 
-// ── 2. Given a list of titles, find each one in the body text ──
-// Looks for each title appearing on its own line (surrounded by blank lines).
-function splitByContents(text, titles) {
-  const lines = text.split('\n');
-  const result = [];
+// ── 2. Parse a TOC entry into { keyword, number, title } parts ──
+// Any part may be null.  Handles:
+//   "CHAPTER I. THE RIVER BANK"  → kw=CHAPTER, num=I,   title=THE RIVER BANK
+//   "CHAPTER I"                  → kw=CHAPTER, num=I,   title=null
+//   "I. The River Bank"          → kw=null,    num=I,   title=The River Bank
+//   "The River Bank"             → kw=null,    num=null, title=The River Bank
+//   "PROLOGUE"                   → kw=PROLOGUE, num=null, title=null
+function parseTocEntry(entry) {
+  const e = entry.trim();
+  const SEP = '[\\s.:\u2014\u2013\\-]';   // space, dot, colon, em/en dash, hyphen
+  let m;
 
-  // For each title, build a flexible regex that matches it as a standalone heading line.
-  // We normalise whitespace and allow for minor punctuation differences.
-  function titleToRegex(title) {
-    // Escape regex special chars, then allow flexible whitespace
-    const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '[\\s]+');
-    return new RegExp(`^[ \\t]*${escaped}[ \\t]*$`, 'i');
+  m = new RegExp('^(' + HEADING_KEYWORD_SRC + ')\\b[\\s.]*(?:(' + HEADING_NUMBER_SRC + ')\\b)?' + SEP + '*(.*)$', 'i').exec(e);
+  if (m) {
+    const title = (m[3] || '').trim().replace(new RegExp('^' + SEP + '+'), '');
+    return { keyword: m[1], number: m[2] || null, title: title || null, raw: e };
+  }
+  m = new RegExp('^(' + HEADING_NUMBER_SRC + ')\\b' + SEP + '+(.+)$', 'i').exec(e);
+  if (m) return { keyword: null, number: m[1], title: m[2].trim(), raw: e };
+  m = new RegExp('^(' + HEADING_NUMBER_SRC + ')\\s*\\.?\\s*$', 'i').exec(e);
+  if (m) return { keyword: null, number: m[1], title: null, raw: e };
+  return { keyword: null, number: null, title: e, raw: e };
+}
+
+// ── 3. Build candidate heading matchers for a parsed TOC entry ──
+// Ordered most-specific → least-specific.  Each matcher returns
+// { span: 1|2 } when it fires (how many lines the body heading occupies).
+function buildHeadingMatchers(parsed) {
+  const { keyword, number, title } = parsed;
+  const kw = keyword ? flexWs(keyword) : null;
+  const nm = number  ? flexWs(number)  : null;
+  const tl = title   ? flexWs(title)   : null;
+  const SEP = '[\\s.:\u2014\u2013\\-]';
+  const matchers = [];
+
+  // (a) one line: KEYWORD NUMBER[sep] TITLE
+  if (kw && nm && tl) {
+    const re = new RegExp('^' + kw + '\\s+' + nm + SEP + '+' + tl + '\\s*$', 'i');
+    matchers.push({ span: 1, test: (l1) => re.test(l1) });
+  }
+  // (b) two lines: "KEYWORD NUMBER" / "TITLE"
+  if (kw && nm && tl) {
+    const r1 = new RegExp('^' + kw + '\\s+' + nm + '\\s*' + SEP + '?\\s*$', 'i');
+    const r2 = new RegExp('^' + tl + '\\s*$', 'i');
+    matchers.push({ span: 2, test: (l1, l2) => r1.test(l1) && l2 != null && r2.test(l2) });
+  }
+  // (c) two lines: "NUMBER" / "TITLE" ← Wind-in-the-Willows style
+  if (nm && tl) {
+    const r1 = new RegExp('^' + nm + '\\s*[.:]?\\s*$', 'i');
+    const r2 = new RegExp('^' + tl + '\\s*$', 'i');
+    matchers.push({ span: 2, test: (l1, l2) => r1.test(l1) && l2 != null && r2.test(l2) });
+  }
+  // (d) one line: NUMBER[sep] TITLE (keyword elided from body)
+  if (nm && tl) {
+    const re = new RegExp('^' + nm + SEP + '+' + tl + '\\s*$', 'i');
+    matchers.push({ span: 1, test: (l1) => re.test(l1) });
+  }
+  // (e) one line: KEYWORD NUMBER (no title)
+  if (kw && nm) {
+    const re = new RegExp('^' + kw + '\\s+' + nm + '\\s*' + SEP + '?\\s*$', 'i');
+    matchers.push({ span: 1, test: (l1) => re.test(l1) });
+  }
+  // (f) one line: NUMBER alone ("I." or "1")
+  if (nm) {
+    const re = new RegExp('^' + nm + '\\s*[.:]?\\s*$', 'i');
+    matchers.push({ span: 1, test: (l1) => re.test(l1) });
+  }
+  // (g) one line: KEYWORD alone ("PROLOGUE")
+  if (kw && !nm) {
+    const re = new RegExp('^' + kw + '\\s*[.:]?\\s*$', 'i');
+    matchers.push({ span: 1, test: (l1) => re.test(l1) });
+  }
+  // (h) one line: TITLE alone — least specific, only when no kw/nm
+  if (tl && !nm && !kw) {
+    const re = new RegExp('^' + tl + '\\s*$', 'i');
+    matchers.push({ span: 1, test: (l1) => re.test(l1) });
   }
 
-  const regexes = titles.map(titleToRegex);
+  return matchers;
+}
 
-  // Find the line index for each title (first occurrence after previous match)
-  const splitLineIdxs = []; // [{titleIdx, lineIdx}]
-  let searchFrom = 0;
+// ── 4. Locate each TOC entry in the body and build chapters ──
+function splitByContents(text, toc) {
+  const { titles, tocEndLineIdx } = toc;
+  const parsed = titles.map(parseTocEntry);
+  const lines  = text.split('\n');
 
-  for (let t = 0; t < titles.length; t++) {
-    const re = regexes[t];
-    let found = -1;
+  let searchFrom = Math.min(lines.length, tocEndLineIdx);
+  const hits = [];
+
+  for (let ei = 0; ei < parsed.length; ei++) {
+    const matchers = buildHeadingMatchers(parsed[ei]);
+    if (!matchers.length) continue;
+
+    let found = null;
+
     for (let i = searchFrom; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      if (re.test(line)) {
-        // Verify it's a standalone heading: blank line before and/or after
-        const prevBlank = i === 0 || lines[i - 1].trim() === '';
-        const nextBlank = i + 1 >= lines.length || lines[i + 1].trim() === '';
-        if (prevBlank || nextBlank) {
-          found = i;
-          searchFrom = i + 1;
-          break;
+      const l1 = lines[i].trim();
+      if (!l1) continue;
+
+      const prevBlank = i === 0 || lines[i - 1].trim() === '';
+      if (!prevBlank) continue;
+
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() === '') j++;
+      const gap   = j - (i + 1);
+      const l2raw = j < lines.length ? lines[j].trim() : '';
+
+      for (const m of matchers) {
+        if (m.span === 1) {
+          if (m.test(l1)) {
+            const next = lines[i + 1] !== undefined ? lines[i + 1].trim() : '';
+            if (next === '') found = { entryIdx: ei, startLine: i, span: 1 };
+            break;
+          }
+        } else {
+          if (gap <= 1 && m.test(l1, l2raw)) {
+            const afterJ = j + 1 < lines.length ? lines[j + 1].trim() : '';
+            if (afterJ === '') found = { entryIdx: ei, startLine: i, span: (j - i) + 1 };
+            break;
+          }
         }
       }
+
+      if (found) break;
     }
-    if (found !== -1) {
-      splitLineIdxs.push({ titleIdx: t, lineIdx: found });
+
+    if (found) {
+      hits.push(found);
+      searchFrom = found.startLine + found.span;
     }
   }
 
-  // Need at least 2 to be worth splitting
-  if (splitLineIdxs.length < 2) return null;
+  if (hits.length < 2) return null;
 
-  // Any text before the first heading = Front Matter
-  const firstLine = splitLineIdxs[0].lineIdx;
-  if (firstLine > 0) {
-    const before = lines.slice(0, firstLine).join('\n').trim();
+  const result = [];
+  const firstStart = hits[0].startLine;
+  if (firstStart > 0) {
+    const before = lines.slice(0, firstStart).join('\n').trim();
     if (before.length > 100) {
       result.push({ title: 'Front Matter', num: 0, text: before, words: countWords(before) });
     }
@@ -957,24 +1055,24 @@ function splitByContents(text, titles) {
 
   const keepHeading = document.getElementById('optKeepHeading').checked;
 
-  for (let s = 0; s < splitLineIdxs.length; s++) {
-    const { titleIdx, lineIdx } = splitLineIdxs[s];
-    const endLine = s + 1 < splitLineIdxs.length ? splitLineIdxs[s + 1].lineIdx : lines.length;
-    const chunkLines = lines.slice(lineIdx, endLine);
-    const heading = chunkLines[0].trim();
-    let body = chunkLines.join('\n').trim();
+  for (let h = 0; h < hits.length; h++) {
+    const hit  = hits[h];
+    const next = hits[h + 1];
+    const startLine = hit.startLine;
+    const endLine   = next ? next.startLine : lines.length;
+    const chunkLines = lines.slice(startLine, endLine);
 
-    if (!keepHeading) {
-      const nl = body.indexOf('\n');
-      body = nl !== -1 ? body.slice(nl + 1).trim() : '';
-    }
+    const body = (keepHeading
+      ? chunkLines.join('\n')
+      : chunkLines.slice(hit.span).join('\n')
+    ).trim();
 
     if (body.length < 10) continue;
 
     result.push({
-      title: titles[titleIdx] || heading,
-      num: s + 1,
-      text: body,
+      title: parsed[hit.entryIdx].raw,
+      num:   h + 1,
+      text:  body,
       words: countWords(body),
     });
   }
@@ -982,27 +1080,53 @@ function splitByContents(text, titles) {
   return result.length >= 2 ? result : null;
 }
 
-// ── 3. Fallback: regex-based heading detection ──
-const CHAPTER_RE = /^[ \t]*((?:CHAPTER|PART|BOOK|SECTION|ACT|SCENE|VOLUME|LETTER|PROLOGUE|EPILOGUE|INTRODUCTION|PREFACE|APPENDIX)(?:[ \t]+(?:[IVXLCDM]+|[0-9]+|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE|FIRST|SECOND|THIRD|FOURTH|FIFTH|THE\s+FIRST|THE\s+SECOND))?(?:\.?[ \t]*[-–—:]?[ \t]*[^\n]{0,80})?)[ \t]*$/im;
-
+// ── 5. Fallback: regex-based heading detection (no usable TOC) ──
+// Handles three shapes, each surrounded by blank lines:
+//   (A) "CHAPTER I. THE RIVER BANK"        (one line)
+//   (B) "CHAPTER I" / "THE RIVER BANK"     (two adjacent lines)
+//   (C) "I." / "THE RIVER BANK"            (two adjacent lines, keyword elided)
 function splitByRegex(text) {
   const lines = text.split('\n');
-  const splits = [];
+  const SEP = '[\\s.:\u2014\u2013\\-]';
+
+  const KW_FULL_RE = new RegExp('^' + HEADING_KEYWORD_SRC + '\\b[\\s.]*(?:' + HEADING_NUMBER_SRC + '\\b)?' + SEP + '*[^\\n]{0,100}$', 'i');
+  const KW_NUM_RE  = new RegExp('^' + HEADING_KEYWORD_SRC + '\\b\\s*(?:' + HEADING_NUMBER_SRC + '\\b)?\\s*' + SEP + '?\\s*$', 'i');
+  const NUM_RE     = new RegExp('^' + HEADING_NUMBER_SRC + '\\s*[.:]?\\s*$', 'i');
+  // Partner title line: short, uppercase-leading, no lowercase prose-run.
+  const TITLE_LINE_RE = /^[\"'\u2018\u2019\u201C\u201D(]?[A-Z][A-Z0-9 ,.;:!?'"\u2018\u2019\u201C\u201D()&/\-\u2013\u2014]{2,120}$/;
+
+  const heads = [];
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
+    const l1 = lines[i].trim();
+    if (!l1) continue;
+
     const prevBlank = i === 0 || lines[i - 1].trim() === '';
-    const nextBlank = i + 1 >= lines.length || lines[i + 1].trim() === '';
-    if (CHAPTER_RE.test(line) && prevBlank && nextBlank) splits.push(i);
+    if (!prevBlank) continue;
+
+    const next  = lines[i + 1] !== undefined ? lines[i + 1].trim() : '';
+    const after = lines[i + 2] !== undefined ? lines[i + 2].trim() : '';
+
+    if (KW_FULL_RE.test(l1) && next === '') {
+      heads.push({ startLine: i, span: 1 });
+      continue;
+    }
+    if (KW_NUM_RE.test(l1) && next && TITLE_LINE_RE.test(next) && after === '') {
+      heads.push({ startLine: i, span: 2 });
+      continue;
+    }
+    if (NUM_RE.test(l1) && next && TITLE_LINE_RE.test(next) && after === '') {
+      heads.push({ startLine: i, span: 2 });
+      continue;
+    }
   }
 
-  if (splits.length === 0) return null;
+  if (heads.length < 2) return null;
 
   const result = [];
-  const firstSplit = splits[0];
-  if (firstSplit > 0) {
-    const before = lines.slice(0, firstSplit).join('\n').trim();
+  const firstStart = heads[0].startLine;
+  if (firstStart > 0) {
+    const before = lines.slice(0, firstStart).join('\n').trim();
     if (before.length > 100) {
       result.push({ title: 'Front Matter', num: 0, text: before, words: countWords(before) });
     }
@@ -1010,49 +1134,52 @@ function splitByRegex(text) {
 
   const keepHeading = document.getElementById('optKeepHeading').checked;
 
-  for (let s = 0; s < splits.length; s++) {
-    const start = splits[s];
-    const end = s + 1 < splits.length ? splits[s + 1] : lines.length;
-    const chunkLines = lines.slice(start, end);
-    const heading = chunkLines[0].trim();
-    let body = chunkLines.join('\n').trim();
-    if (!keepHeading) {
-      const nl = body.indexOf('\n');
-      body = nl !== -1 ? body.slice(nl + 1).trim() : '';
-    }
+  for (let h = 0; h < heads.length; h++) {
+    const hit  = heads[h];
+    const next = heads[h + 1];
+    const startLine = hit.startLine;
+    const endLine   = next ? next.startLine : lines.length;
+    const chunkLines = lines.slice(startLine, endLine);
+    const headingLines = chunkLines.slice(0, hit.span).map(s => s.trim()).filter(Boolean);
+    const title = headingLines.join(' — ');
+
+    const body = (keepHeading
+      ? chunkLines.join('\n')
+      : chunkLines.slice(hit.span).join('\n')
+    ).trim();
+
     if (body.length < 10) continue;
-    result.push({ title: heading, num: s + 1, text: body, words: countWords(body) });
+
+    result.push({ title, num: h + 1, text: body, words: countWords(body) });
   }
 
-  return result.length >= 1 ? result : null;
+  return result.length >= 2 ? result : null;
 }
 
-// ── 4. Orchestrator ──
+// ── 6. Orchestrator ──
 function splitChapters(text) {
-  // Try Contents-based splitting first
-  const tocTitles = extractContents(text);
-  if (tocTitles) {
-    const byContents = splitByContents(text, tocTitles);
+  // Normalise line endings so downstream regexes can rely on plain \n.
+  text = text.replace(/\r\n?/g, '\n');
+  const toc = extractContents(text);
+  if (toc) {
+    const byContents = splitByContents(text, toc);
     if (byContents) {
-      showSplitMethod(`Contents list used — ${byContents.filter(c=>c.num>0).length} sections found`);
+      showSplitMethod(`Contents list used — ${byContents.filter(c => c.num > 0).length} sections found`);
       return byContents;
     }
   }
 
-  // Fallback to regex detection
   const byRegex = splitByRegex(text);
   if (byRegex) {
-    showSplitMethod(`No Contents list found — headings detected automatically (${byRegex.filter(c=>c.num>0).length} chapters)`);
+    showSplitMethod(`No usable Contents list — headings detected automatically (${byRegex.filter(c => c.num > 0).length} chapters)`);
     return byRegex;
   }
 
-  // No splitting possible
   showSplitMethod('No chapters detected — returning full text');
   return [{ title: bookTitle || 'Full Text', num: 1, text: text, words: countWords(text) }];
 }
 
 function showSplitMethod(msg) {
-  // Show in whichever note is visible / most recently used
   for (const id of ['fetchNote', 'pasteNote']) {
     const el = document.getElementById(id);
     if (el && el.classList.contains('show')) {
@@ -1061,7 +1188,6 @@ function showSplitMethod(msg) {
       return;
     }
   }
-  // Fallback: show in pasteNote
   const el = document.getElementById('pasteNote');
   if (el) { el.className = 'note note-ok show'; el.textContent = '✓ ' + msg; }
 }
