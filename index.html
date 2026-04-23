@@ -1350,6 +1350,22 @@ function stripLeadingHeading(body, title) {
   return lines.slice(i).join('\n').trim();
 }
 
+// Unwrap soft-wrapped paragraphs so each paragraph is ONE long line.
+// Gutenberg plain-text wraps at ~70 chars; in strict Markdown those are
+// soft breaks that get joined on render, but naive importers (Folio's
+// included, at time of writing) treat every \n as a hard paragraph break
+// and also run keyword heuristics on line starts.  Emitting one-line
+// paragraphs sidesteps both problems — the file renders the same in any
+// correct Markdown viewer and imports cleanly everywhere else too.
+function unwrapParagraphs(body) {
+  if (!body) return '';
+  return body
+    .split(/\n{2,}/)
+    .map(p => p.trim().replace(/\s*\n\s*/g, ' '))
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 function toMd() {
   const includeFront = false;         // Front-matter chunk is Gutenberg artifacts; skip by default.
   const parts = [];
@@ -1357,7 +1373,7 @@ function toMd() {
   for (const ch of chapters) {
     if (ch.num === 0 && !includeFront) continue;
 
-    const body = stripLeadingHeading(ch.text, ch.title).trim();
+    const body = unwrapParagraphs(stripLeadingHeading(ch.text, ch.title)).trim();
     if (ch.num === 0) {
       // Only reached when includeFront is flipped on.
       if (body) parts.push(body, '');
