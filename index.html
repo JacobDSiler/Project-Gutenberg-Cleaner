@@ -607,6 +607,7 @@ textarea { resize: vertical; min-height: 90px; }
       </ul>
       <div class="ch-export-bar" id="chExportBar" style="display:none">
         <div class="ch-export-label">Export all chapters</div>
+        <button class="btn btn-primary btn-sm" onclick="exportManuscript()" title="One .md file with # before each chapter heading. Drops into Reedsy, Folio, Scrivener, Word, etc.">Manuscript (.md)</button>
         <div class="ch-export-btns">
           <button class="btn btn-ghost btn-sm" onclick="exportAll('txt')">All as .txt</button>
           <button class="btn btn-ghost btn-sm" onclick="exportAll('rtf')">All as .rtf</button>
@@ -1311,6 +1312,75 @@ function exportAll(fmt) {
       download(chapterFilename(ch, fmt), content, mime);
     }, i * 150);
   });
+}
+
+/* ─────────────────────────────────────────────
+   Manuscript (.md) export — single file ready for
+   Reedsy / Folio / Scrivener / Word, etc.
+───────────────────────────────────────────── */
+
+// Strip a duplicate leading heading from a chapter body if one is there.
+// Needed because optKeepHeading may have left the heading in ch.text; the
+// manuscript format always synthesises its own `# Heading` line, so we
+// don't want it twice.  Tolerates one- or two-line body headings.
+function stripLeadingHeading(body, title) {
+  if (!body) return '';
+  const lines = body.split('\n');
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === '') i++;           // leading blanks
+  if (i >= lines.length) return '';
+
+  const norm = (s) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+  const T = norm(title);
+
+  // Try up to 2 body-heading lines: accept if each is contained in the title
+  // (loosely) and at least one of them actually matches something meaningful.
+  let consumed = 0;
+  for (let k = 0; k < 2 && (i + k) < lines.length; k++) {
+    const L = norm(lines[i + k]);
+    if (!L) break;
+    if (L.length < 2) break;
+    if (T === L || T.includes(L) || L.includes(T)) consumed = k + 1;
+    else break;
+  }
+  if (consumed === 0) return body;
+
+  i += consumed;
+  while (i < lines.length && lines[i].trim() === '') i++;           // trailing blanks after heading
+  return lines.slice(i).join('\n').trim();
+}
+
+function toMd() {
+  const includeFront = false;         // Front-matter chunk is Gutenberg artifacts; skip by default.
+  const parts = [];
+
+  for (const ch of chapters) {
+    if (ch.num === 0 && !includeFront) continue;
+
+    const body = stripLeadingHeading(ch.text, ch.title).trim();
+    if (ch.num === 0) {
+      // Only reached when includeFront is flipped on.
+      if (body) parts.push(body, '');
+      continue;
+    }
+
+    parts.push('# ' + ch.title.trim(), '');
+    if (body) parts.push(body, '');
+  }
+
+  // Collapse any run of 3+ blank lines produced by the assembly step.
+  return parts.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+
+function exportManuscript() {
+  if (!chapters.length) return;
+  const content = toMd();
+  const slug = (bookTitle || 'manuscript')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'manuscript';
+  download(slug + '.md', content, 'text/markdown;charset=utf-8');
 }
 
 function download(name, content, mime) {
