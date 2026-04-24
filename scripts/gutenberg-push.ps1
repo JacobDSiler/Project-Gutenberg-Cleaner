@@ -138,7 +138,7 @@ try {
         }
     }
 
-    $assetPatterns = @('*.js', '*.css')
+    $assetPatterns = @('*.js', '*.css', '*.json', '*.webmanifest', '*.png', '*.svg', '*.ico', '*.webp', '*.jpg', '*.jpeg')
     foreach ($pat in $assetPatterns) {
         Get-ChildItem -Path $srcRoot -File -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object {

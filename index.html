@@ -631,11 +631,31 @@ textarea { resize: vertical; min-height: 90px; }
 .guide-tag-wip  { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-bdr); }
 .guide-tag-soon { background: var(--link-bg); color: var(--link); border: 1px solid var(--border); }
 </style>
+
+<!-- Branding / PWA -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3d6b50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gutenberg Cleaner">
+<meta name="description" content="Fetch any Project Gutenberg book, strip license/header/footer, split into clean chapters, and export as a manuscript (.md), .txt, or .rtf — ready for Folio, Reedsy, Scrivener, or any ebook pipeline.">
+<meta property="og:title" content="Gutenberg Text Cleaner">
+<meta property="og:description" content="Turn any Project Gutenberg link into clean, split chapters ready for publishing.">
+<meta property="og:image" content="icon-512.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 </head>
 <body>
 
 <header class="app-header">
-  <h1>Gutenberg <em>Text Cleaner</em></h1>
+  <div style="display:flex;align-items:center;gap:.7rem">
+    <img src="favicon.svg" alt="" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0">
+    <h1>Gutenberg <em>Text Cleaner</em></h1>
+  </div>
   <span class="header-tag">Chapter Splitter &amp; Exporter</span>
 </header>
 
@@ -1668,6 +1688,15 @@ document.addEventListener('keydown', e => {
     if (modal && modal.classList.contains('show')) closeGuide();
   }
 });
+
+/* ─────────────────────────────────────────────
+   Service worker registration (PWA installability)
+───────────────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* silent */ });
+  });
+}
 </script>
 </body>
 </html>

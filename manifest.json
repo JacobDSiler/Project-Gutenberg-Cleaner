@@ -1,0 +1,34 @@
+{
+  "name": "Gutenberg Text Cleaner",
+  "short_name": "GutenbergCleaner",
+  "description": "Fetch any Project Gutenberg book, strip the license/header/footer, split it into clean chapters, and export as a manuscript (.md), .txt, or .rtf — ready for Folio, Reedsy, Scrivener, or any ebook pipeline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2efe6",
+  "theme_color": "#3d6b50",
+  "categories": ["books", "education", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
