@@ -630,6 +630,44 @@ textarea { resize: vertical; min-height: 90px; }
 .guide-tag-done { background: var(--ok-bg); color: var(--ok); }
 .guide-tag-wip  { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-bdr); }
 .guide-tag-soon { background: var(--link-bg); color: var(--link); border: 1px solid var(--border); }
+
+/* ── Open-in-Folio button ── */
+.folio-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  gap: .55rem;
+  padding: .7rem 1rem;
+  font-size: .88rem;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent2);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .05s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+.folio-btn:hover { background: var(--accent2); border-color: var(--accent2); }
+.folio-btn:active { transform: translateY(1px); }
+.folio-btn:disabled { opacity: .6; cursor: not-allowed; }
+.folio-btn-sub {
+  display: block;
+  font-size: .66rem;
+  font-weight: 400;
+  color: var(--text3);
+  margin-top: .35rem;
+  text-align: center;
+  line-height: 1.4;
+}
+.ch-export-divider {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .65rem; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin: .55rem 0 .1rem;
+}
+.ch-export-divider::before, .ch-export-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
 </style>
 
 <!-- Branding / PWA -->
@@ -741,7 +779,14 @@ textarea { resize: vertical; min-height: 90px; }
       </ul>
       <div class="ch-export-bar" id="chExportBar" style="display:none">
         <div class="ch-export-label">Export all chapters</div>
-        <button class="btn btn-primary btn-sm" onclick="exportManuscript()" title="One .md file with # before each chapter heading. Drops into Reedsy, Folio, Scrivener, Word, etc.">Manuscript (.md)</button>
+        <button class="folio-btn" id="folioBtn" onclick="openInFolio()" title="Open a brand-new folio named after this book, with chapters already split, ready for cover / intro / audio.">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M18 10l4 2-4 2"/></svg>
+          Open in Folio
+        </button>
+        <small class="folio-btn-sub">Creates a new folio from this book &mdash; chapters pre-split, ready for cover, intro, and audiobook.</small>
+        <div class="note" id="folioNote"></div>
+        <div class="ch-export-divider">or export as file</div>
+        <button class="btn btn-ghost btn-sm" onclick="exportManuscript()" title="One .md file with # before each chapter heading. Drops into Reedsy, Scrivener, Word, etc.">Manuscript (.md)</button>
         <div class="ch-export-btns">
           <button class="btn btn-ghost btn-sm" onclick="exportAll('txt')">All as .txt</button>
           <button class="btn btn-ghost btn-sm" onclick="exportAll('rtf')">All as .rtf</button>
@@ -803,6 +848,7 @@ const WORKER_URL = 'https://gutenberg-proxy.jacobdsiler.workers.dev/';
 let chapters = [];      // [{title, num, text, words}]
 let activeIdx = -1;
 let bookTitle = '';
+let bookAuthor = '';
 
 /* ─────────────────────────────────────────────
    URL resolution
@@ -926,6 +972,8 @@ function process(raw) {
   // Detect book title early (before stripping)
   const titleMatch = text.match(/^Title:\s*(.+)$/m);
   bookTitle = titleMatch ? titleMatch[1].trim() : '';
+  const authorMatch = text.match(/^Author:\s*(.+)$/m);
+  bookAuthor = authorMatch ? authorMatch[1].trim() : '';
 
   // ── Strip header ──
   if (document.getElementById('optH').checked) {
@@ -1566,6 +1614,110 @@ function showNote(id, type, msg) {
   el.textContent = msg;
 }
 
+
+/* ─────────────────────────────────────────────
+   Open in Folio — cross-subdomain handoff
+───────────────────────────────────────────── */
+const FOLIO_ORIGIN = 'https://folio.jacobsiler.com';
+const FOLIO_IMPORT_URL = FOLIO_ORIGIN + '/?import=pending';
+const FOLIO_READY_TIMEOUT_MS = 30000;
+const FOLIO_BTN_IDLE_HTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M18 10l4 2-4 2"/></svg> Open in Folio';
+
+function extractGutenbergId(raw) {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  const m = trimmed.match(/(?:ebooks|epub|files|cache\/epub)\/(\d+)/);
+  if (m) return m[1];
+  const m2 = trimmed.match(/^(\d+)$/);
+  if (m2) return m2[1];
+  return '';
+}
+
+function getSourceMetadata() {
+  const raw = (document.getElementById('urlInput') || {}).value || '';
+  if (!raw.trim()) return { sourceUrl: '', gutenbergId: '' };
+  const urls = resolveTextUrls(raw);
+  return {
+    sourceUrl:   urls[0] || raw.trim(),
+    gutenbergId: extractGutenbergId(raw),
+  };
+}
+
+function openInFolio() {
+  if (!chapters.length) {
+    showNote('folioNote', 'err', 'Process a book first — nothing to send yet.');
+    return;
+  }
+
+  const btn = document.getElementById('folioBtn');
+  const setBusy = (msg) => {
+    btn.innerHTML = '<div class="spinner"></div> ' + msg;
+    btn.disabled = true;
+  };
+  const resetBtn = () => {
+    btn.innerHTML = FOLIO_BTN_IDLE_HTML;
+    btn.disabled = false;
+  };
+
+  const meta = getSourceMetadata();
+  const payload = {
+    type:         'folio-import-payload',
+    source:       'gutenberg-cleaner',
+    version:      1,
+    title:        (bookTitle  || 'Untitled').slice(0, 500),
+    author:       (bookAuthor || '').slice(0, 500),
+    manuscriptMd: toMd(),
+    metadata: {
+      sourceUrl:    meta.sourceUrl,
+      license:      'Public domain (Project Gutenberg trademark stripped)',
+      gutenbergId:  meta.gutenbergId,
+    },
+  };
+
+  showNote('folioNote', '', '');
+  setBusy('Opening Folio…');
+
+  const popup = window.open(FOLIO_IMPORT_URL, 'folio_import');
+  if (!popup) {
+    resetBtn();
+    showNote('folioNote', 'err',
+      'Popup blocked. Allow popups for this page and try again, or open Folio manually and use its Import menu.');
+    return;
+  }
+
+  let delivered = false;
+  let cancelled = false;
+
+  const onMessage = (ev) => {
+    if (ev.origin !== FOLIO_ORIGIN) return;
+    const d = ev.data;
+    if (!d || d.type !== 'folio-import-ready' || d.version !== 1) return;
+    window.removeEventListener('message', onMessage);
+    try {
+      popup.postMessage(payload, FOLIO_ORIGIN);
+      delivered = true;
+      resetBtn();
+      showNote('folioNote', 'ok',
+        '✓ Sent to Folio — switch to the new tab to continue.');
+    } catch (e) {
+      resetBtn();
+      showNote('folioNote', 'err',
+        'Could not deliver to Folio: ' + (e.message || 'unknown error') + '.');
+    }
+  };
+
+  window.addEventListener('message', onMessage);
+
+  setTimeout(() => {
+    if (delivered || cancelled) return;
+    cancelled = true;
+    window.removeEventListener('message', onMessage);
+    resetBtn();
+    showNote('folioNote', 'err',
+      'Folio didn\'t respond within 30 s. If the tab opened, try again; otherwise check that folio.jacobsiler.com is reachable.');
+  }, FOLIO_READY_TIMEOUT_MS);
+}
+
 /* ─────────────────────────────────────────────
    Publishing Guide
 ───────────────────────────────────────────── */
@@ -1595,10 +1747,10 @@ const GUIDE_SECTIONS = [
     `,
   },
   {
-    n: 3, title: 'Send to Folio', tag: 'soon',
+    n: 3, title: 'Open in Folio', tag: 'done',
     html: `
-      <p>One-click handoff coming soon: creates a brand-new blank folio named after the book and imports the manuscript with chapters pre-split, ready for cover / intro / audio.</p>
-      <p>In the meantime: download the <strong>Manuscript (.md)</strong> from this app, open <a href="https://folio.jacobsiler.com" target="_blank" rel="noopener">Folio</a>, create a new folio named after the book, and import the .md file.</p>
+      <p>Click <strong>Open in Folio</strong> (top of the export bar) and a new tab opens <a href="https://folio.jacobsiler.com" target="_blank" rel="noopener">folio.jacobsiler.com</a>, creates a <strong>brand-new blank folio named after this book</strong>, and imports the manuscript with chapters already split — ready for cover, editor's note, metadata, and audiobook generation.</p>
+      <p>The handoff is a direct browser-to-browser <code>postMessage</code> between the two tabs with origin checks on both ends — no backend, no auth token, no third party. If the popup gets blocked by your browser, allow popups for this site and try again.</p>
     `,
   },
   {
