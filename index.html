@@ -522,6 +522,114 @@ textarea { resize: vertical; min-height: 90px; }
   .main-content { grid-template-columns: 1fr; }
   .chapter-list-panel { max-height: 250px; border-right: none; border-bottom: 1px solid var(--border); }
 }
+
+/* ── Publishing Guide modal ── */
+.guide-trigger {
+  width: 100%;
+  justify-content: flex-start;
+  gap: .5rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  padding: .55rem .75rem;
+}
+.guide-trigger:hover { background: var(--surface2); color: var(--accent2); border-color: var(--accent); }
+.guide-trigger small { margin-left: auto; color: var(--text3); font-size: .68rem; font-weight: 400; letter-spacing: .02em; }
+
+.license-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .7rem;
+  color: var(--text2);
+  text-decoration: none;
+  padding: .2rem 0;
+  margin-top: .2rem;
+}
+.license-link:hover { color: var(--link); text-decoration: underline; }
+
+.guide-modal {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 999;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 2rem;
+}
+.guide-modal.show { display: flex; }
+.guide-modal-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  max-width: 780px; width: 100%;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, .35);
+  border: 1px solid var(--border);
+}
+.guide-modal-head {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.guide-modal-head h2 {
+  font-family: var(--serif-display);
+  font-size: 1.3rem; font-weight: 500;
+  font-style: italic;
+  color: var(--text);
+}
+.guide-close {
+  background: transparent; border: none; color: var(--text3);
+  font-size: 1.3rem; cursor: pointer;
+  width: 32px; height: 32px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+}
+.guide-close:hover { background: var(--surface2); color: var(--text); }
+.guide-modal-body {
+  padding: 1.4rem 1.8rem 1.8rem;
+  overflow-y: auto;
+  font-size: .88rem;
+  line-height: 1.75;
+  color: var(--text);
+}
+.guide-intro {
+  color: var(--text2);
+  font-size: .88rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.guide-section { margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.guide-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+.guide-section h3 {
+  font-family: var(--serif-display);
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--accent);
+  margin-bottom: .6rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.guide-section h3 .n { color: var(--text3); font-weight: 400; font-family: var(--mono); font-size: .85rem; }
+.guide-section p { margin-bottom: .7rem; }
+.guide-section ul { margin: .5rem 0 .7rem 1.3rem; }
+.guide-section li { margin-bottom: .35rem; }
+.guide-section a { color: var(--link); text-decoration: underline; text-decoration-style: dotted; }
+.guide-section a:hover { text-decoration-style: solid; }
+.guide-section code { background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-family: var(--mono); font-size: .82em; }
+.guide-section strong { color: var(--text); }
+.guide-tag {
+  display: inline-block;
+  font-size: .62rem; font-weight: 700; letter-spacing: .06em;
+  padding: .12rem .55rem;
+  border-radius: 10px;
+  margin-left: auto;
+  text-transform: uppercase;
+}
+.guide-tag-done { background: var(--ok-bg); color: var(--ok); }
+.guide-tag-wip  { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-bdr); }
+.guide-tag-soon { background: var(--link-bg); color: var(--link); border: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -536,6 +644,11 @@ textarea { resize: vertical; min-height: 90px; }
   <!-- ── SIDEBAR ── -->
   <aside class="sidebar">
   <div class="sidebar-scroll">
+    <button class="btn guide-trigger" onclick="openGuide()" title="Step-by-step guide from Gutenberg link to published book / audiobook">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Publishing Guide
+      <small>link → sellable book</small>
+    </button>
 
     <!-- Step 1: URL -->
     <div class="step-block">
@@ -557,6 +670,7 @@ textarea { resize: vertical; min-height: 90px; }
         Tries your <strong>Cloudflare Worker</strong> first (if configured), then direct, then 3 public CORS proxies. Set <code>WORKER_URL</code> in the script for the most reliable fetching.
       </div>
       <div class="note" id="fetchNote"></div>
+      <a class="license-link" href="https://www.gutenberg.org/policy/permission.html" target="_blank" rel="noopener">&#x1F4DC; Gutenberg's policy on use &amp; publishing &rarr;</a>
     </div>
 
     <div class="or-divider">or paste manually</div>
@@ -643,9 +757,19 @@ textarea { resize: vertical; min-height: 90px; }
   </div>
 </div>
 
+<!-- Publishing Guide modal -->
+<div id="guideModal" class="guide-modal" role="dialog" aria-modal="true" aria-hidden="true" onclick="closeGuide(event)">
+  <div class="guide-modal-card" onclick="event.stopPropagation()">
+    <div class="guide-modal-head">
+      <h2>Publishing Guide</h2>
+      <button class="guide-close" onclick="closeGuide()" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="guide-modal-body" id="guideBody"></div>
+  </div>
+</div>
 <footer class="app-footer">
   <span>All processing in-browser · nothing sent anywhere</span>
-  <span><a href="https://www.gutenberg.org" target="_blank">Project Gutenberg</a> · <a href="https://github.com" target="_blank">Host on GitHub Pages</a></span>
+  <span><a href="https://www.gutenberg.org" target="_blank">Project Gutenberg</a> · <a href="https://www.gutenberg.org/policy/permission.html" target="_blank">License &amp; permissions</a> · <a href="https://github.com" target="_blank">Host on GitHub Pages</a></span>
 </footer>
 
 <script>
@@ -1421,6 +1545,129 @@ function showNote(id, type, msg) {
   el.className = `note note-${type} show`;
   el.textContent = msg;
 }
+
+/* ─────────────────────────────────────────────
+   Publishing Guide
+───────────────────────────────────────────── */
+
+// Walkthrough content. Each section has real info where it is known for certain;
+// publishing-platform specifics should be verified against each platform's own
+// current documentation before committing to a strategy.
+const GUIDE_SECTIONS = [
+  {
+    n: 1, title: 'Clean the text', tag: 'done',
+    html: `
+      <p>Paste a Project Gutenberg URL (any format: <code>/ebooks/289</code>, <code>/files/289/289-0.txt</code>, or direct .txt links) and click <strong>Fetch &amp; Clean</strong>. If the fetch fails, click the "Open plain-text file" link, copy the full text, and paste it into Step&nbsp;2 — same result.</p>
+      <p>The cleaner strips the Project Gutenberg header, footer, and "Produced by" lines, then splits the book into chapters using the Contents list when available and a heading-detection fallback otherwise. Review the chapter list — if the split looks wrong, toggle the chapter-detection options and re-process.</p>
+      <p>When you're happy: <strong>Manuscript (.md)</strong> is the format for Folio, Reedsy, Scrivener, and Word; <strong>.txt</strong> / <strong>.rtf</strong> are for external editors if you prefer.</p>
+    `,
+  },
+  {
+    n: 2, title: 'Licensing &amp; fair use', tag: 'done',
+    html: `
+      <p>Project Gutenberg's license gives you two paths:</p>
+      <ul>
+        <li><strong>Keep the "Project Gutenberg" trademark and license block intact:</strong> the full PG license applies to your distribution. You can redistribute freely with attribution requirements.</li>
+        <li><strong>Strip all PG references (what this cleaner does by default):</strong> the underlying text, if it is in the public domain in your jurisdiction, has no restrictions. You can adapt, sell, remix, translate, narrate, illustrate, however you like.</li>
+      </ul>
+      <p>Most Gutenberg books are in the US public domain (published before 1930 as of 2026). Life-plus-70 jurisdictions (EU, UK, most of the rest of the world) depend on the author's death year: e.g. Kenneth Grahame died 1932, so <em>Wind in the Willows</em> has been public domain in those jurisdictions since 2003.</p>
+      <p>Read the official documents before you publish commercially: <a href="https://www.gutenberg.org/policy/permission.html" target="_blank" rel="noopener">Gutenberg permissions policy</a> · <a href="https://www.gutenberg.org/policy/license.html" target="_blank" rel="noopener">Full license text</a> · <a href="https://www.gutenberg.org/help/copyright.html" target="_blank" rel="noopener">Copyright FAQ</a>.</p>
+    `,
+  },
+  {
+    n: 3, title: 'Send to Folio', tag: 'soon',
+    html: `
+      <p>One-click handoff coming soon: creates a brand-new blank folio named after the book and imports the manuscript with chapters pre-split, ready for cover / intro / audio.</p>
+      <p>In the meantime: download the <strong>Manuscript (.md)</strong> from this app, open <a href="https://folio.jacobsiler.com" target="_blank" rel="noopener">Folio</a>, create a new folio named after the book, and import the .md file.</p>
+    `,
+  },
+  {
+    n: 4, title: 'Polish the book in Folio', tag: 'wip',
+    html: `
+      <p>Before publishing, Folio lets you add the extras that make this a real edition rather than a verbatim reprint — which matters for both quality and (crucially) for surviving KDP's undifferentiated-content policy.</p>
+      <ul>
+        <li><strong>Cover</strong> — upload your own or use a placeholder. EPUB requires one; every store requires one.</li>
+        <li><strong>Title page &amp; copyright page</strong> — generated from your metadata (publisher, year, license statement).</li>
+        <li><strong>Editor's note or introduction</strong> — optional for personal use, <strong>required</strong> for KDP and strongly advised for any commercial release. Even a two-paragraph editor's note on the book's history and why you're publishing this edition is enough to differentiate it.</li>
+        <li><strong>Metadata</strong> — publisher / imprint name (make one up if you don't have one — e.g. "Siler Editions"), publication year, optional ISBN.</li>
+      </ul>
+    `,
+  },
+  {
+    n: 5, title: 'Audiobook generation', tag: 'wip',
+    html: `
+      <p>Folio's built-in text-to-speech pipeline (Google Cloud TTS + ElevenLabs) produces per-chapter MP3 files with ID3 chapter tags. Cost preview is shown before you commit; pick a voice, generate, preview in the drawer, regenerate chapters you don't like.</p>
+      <p>For personal use or direct sale, the MP3 set is ready to go. For marketplace submission (Section 7), you'll usually need to repackage: <strong>ACX/Audible</strong> wants an M4B with chapter markers, <strong>Findaway</strong> accepts per-chapter MP3s with specific bitrate requirements. Folio can bundle chapters into an M4B; check your platform's current spec sheet for the bitrate details before finalising.</p>
+    `,
+  },
+  {
+    n: 6, title: 'Publish the ebook', tag: 'wip',
+    html: `
+      <p>Three realistic paths:</p>
+      <ul>
+        <li><strong>Amazon KDP (Kindle)</strong> — largest marketplace, strictest rules. Critical: <strong>Amazon rejects "undifferentiated public domain content"</strong> — you cannot just upload a verbatim PG text. You must add meaningful value: a new introduction, annotations, editor's note, illustrations, or a cover designed for this edition. Folio's editor's-note feature is the <em>minimum</em> bar. Accepts DOCX, EPUB, or KPF.</li>
+        <li><strong>Kobo Writing Life · Draft2Digital · Smashwords</strong> — aggregators that push to Apple Books, Barnes &amp; Noble, libraries, etc. Lenient on public-domain reprints but still expect cover + metadata. EPUB.</li>
+        <li><strong>Direct sale (Gumroad, Payhip)</strong> — no platform restrictions, you keep ~95% of revenue, but you handle discovery yourself. Folio already integrates Gumroad for paid releases. EPUB or PDF.</li>
+      </ul>
+      <p>Start direct-sale to validate, then add aggregators for reach; leave KDP for last because the differentiation requirement is the strictest.</p>
+    `,
+  },
+  {
+    n: 7, title: 'Publish the audiobook', tag: 'wip',
+    html: `
+      <p>Three paths, each with different rules on AI narration — this area is moving fast, always re-verify before committing:</p>
+      <ul>
+        <li><strong>ACX</strong> (Audible + Apple Books) — the largest audiobook marketplace. Historically required human narration; AI-narration rules are evolving. Offers exclusive (40% royalty) vs. non-exclusive (25%). Technical spec is fussy: M4B with chapter markers, 192kbps+ CBR MP3 internals, each chapter under 120 minutes, retail-sample required.</li>
+        <li><strong>Findaway Voices</strong> — distributes to Audible, Apple, Google Play, Kobo, Scribd, libraries, and more. Generally more permissive on AI narration. Per-project fee, then royalties.</li>
+        <li><strong>Direct sale (Gumroad, Payhip, your own site)</strong> — unlimited format freedom, keep most of the revenue, handle distribution yourself. Works well if you have any audience.</li>
+      </ul>
+      <p>Verify each platform's current AI-narration policy before uploading. Policies have changed multiple times in 2024-2026 and will keep moving.</p>
+    `,
+  },
+  {
+    n: 8, title: 'Legal loose ends', tag: 'wip',
+    html: `
+      <ul>
+        <li><strong>ISBN</strong> — NOT required for Amazon KDP (Amazon assigns a free ASIN). Required for most other channels if you want store placement. Each format (print, ebook, audiobook) needs its own ISBN. In the US, buy from <a href="https://www.myidentifiers.com" target="_blank" rel="noopener">Bowker</a> (≈ $125 for one, $295 for ten). Other countries have national agencies (UK: Nielsen, Canada: free via Library and Archives Canada).</li>
+        <li><strong>Publisher / imprint name</strong> — just invent one (e.g. "Siler Editions"). No registration needed in most jurisdictions, but check local requirements if you scale commercially.</li>
+        <li><strong>Tax identifier</strong> — every platform that pays royalties needs a tax ID. In the US, an <a href="https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online" target="_blank" rel="noopener">EIN</a> is free from the IRS and keeps your SSN off royalty paperwork.</li>
+        <li><strong>Rights</strong> — the original text being public-domain means you can use it; any new content you add (cover, intro, annotations, narration) is under your own copyright automatically, no registration needed in most Berne Convention countries, but US registration helps if you ever need to sue for infringement.</li>
+      </ul>
+      <p class="guide-intro" style="border-top: 1px solid var(--border); padding-top: .8rem; margin-top: 1.2rem; border-bottom: none;"><em>This section and Sections 5–7 are living documents. As you (or the Cleaner's users) work through actual publishing, corrections and platform-specific notes get folded back in here.</em></p>
+    `,
+  },
+];
+
+function openGuide() {
+  const body = document.getElementById('guideBody');
+  const intro = `<div class="guide-intro">This walks you through the full path from a Project Gutenberg URL to a finished, sellable book and audiobook. Sections marked <span class="guide-tag guide-tag-done">done</span> are what this cleaner does today. <span class="guide-tag guide-tag-soon">soon</span> is implemented next. <span class="guide-tag guide-tag-wip">wip</span> is best-effort guidance pending real-world validation.</div>`;
+  body.innerHTML = intro + GUIDE_SECTIONS.map(s => {
+    const tagCls = 'guide-tag guide-tag-' + (s.tag || 'wip');
+    const tagLbl = s.tag === 'done' ? 'done' : s.tag === 'soon' ? 'coming soon' : s.tag === 'wip' ? 'wip' : s.tag;
+    return `<div class="guide-section">
+      <h3><span class="n">${s.n}.</span> ${s.title}<span class="${tagCls}">${tagLbl}</span></h3>
+      ${s.html}
+    </div>`;
+  }).join('');
+  const modal = document.getElementById('guideModal');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeGuide(e) {
+  // Close only if clicking the backdrop, the close button, or no event (Esc)
+  if (e && e.target && e.target.id !== 'guideModal' && !e.target.classList.contains('guide-close')) return;
+  const modal = document.getElementById('guideModal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('guideModal');
+    if (modal && modal.classList.contains('show')) closeGuide();
+  }
+});
 </script>
 </body>
 </html>
