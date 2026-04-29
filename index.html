@@ -43,31 +43,33 @@
       --radius-lg: 12px;
     }
 
-    :root[data-theme="dark"] {
-      --bg: #141210;
-      --surface: #1e1c18;
-      --surface2: #272420;
-      --surface3: #302e28;
-      --border: #383430;
-      --border2: #4a4640;
-      --text: #eae6d8;
-      --text2: #9a9080;
-      --text3: #605a50;
-      --accent: #6aaa80;
-      --accent2: #88c49a;
-      --accent-bg: #142018;
-      --link: #7aaae0;
-      --link-bg: #10182a;
-      --warn-bg: #1e1808;
-      --warn: #c4a030;
-      --warn-bdr: #7a6010;
-      --ok-bg: #0e1e14;
-      --ok: #70c088;
-      --err-bg: #1e0e0e;
-      --err: #d47070;
-      --ch-hover: #28261e;
-      --ch-active: #142018;
-      --ch-active-bdr: #6aaa80;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141210;
+        --surface: #1e1c18;
+        --surface2: #272420;
+        --surface3: #302e28;
+        --border: #383430;
+        --border2: #4a4640;
+        --text: #eae6d8;
+        --text2: #9a9080;
+        --text3: #605a50;
+        --accent: #6aaa80;
+        --accent2: #88c49a;
+        --accent-bg: #142018;
+        --link: #7aaae0;
+        --link-bg: #10182a;
+        --warn-bg: #1e1808;
+        --warn: #c4a030;
+        --warn-bdr: #7a6010;
+        --ok-bg: #0e1e14;
+        --ok: #70c088;
+        --err-bg: #1e0e0e;
+        --err: #d47070;
+        --ch-hover: #28261e;
+        --ch-active: #142018;
+        --ch-active-bdr: #6aaa80;
+      }
     }
 
     *,
@@ -129,29 +131,6 @@
       letter-spacing: .04em;
     }
 
-    .theme-toggle {
-      background: transparent;
-      border: none;
-      color: var(--text2);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: .35rem;
-      border-radius: var(--radius);
-      transition: background .15s, color .15s;
-    }
-
-    .theme-toggle:hover {
-      background: var(--surface2);
-      color: var(--text);
-    }
-
-    .theme-toggle svg {
-      width: 1.1rem;
-      height: 1.1rem;
-    }
-
     /* ── LAYOUT ── */
     .app-body {
       flex: 1;
@@ -180,6 +159,7 @@
       gap: 1.25rem;
     }
 
+    /* Step blocks */
     .step-block {
       display: flex;
       flex-direction: column;
@@ -283,6 +263,7 @@
       display: none;
     }
 
+    /* Notices */
     .note {
       border-radius: var(--radius);
       padding: .55rem .8rem;
@@ -317,6 +298,7 @@
       border: 1px solid var(--border);
     }
 
+    /* Divider */
     .or-divider {
       display: flex;
       align-items: center;
@@ -333,6 +315,7 @@
       background: var(--border);
     }
 
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -387,6 +370,7 @@
       font-size: .74rem;
     }
 
+    /* Options */
     .opt-section-head {
       font-size: .66rem;
       font-weight: 700;
@@ -421,6 +405,7 @@
       margin-top: 1px;
     }
 
+    /* Spinner */
     .spinner {
       width: 13px;
       height: 13px;
@@ -445,6 +430,7 @@
       overflow: hidden;
     }
 
+    /* Chapter list */
     .chapter-list-panel {
       background: var(--surface2);
       border-right: 1px solid var(--border);
@@ -547,6 +533,7 @@
       line-height: 1.6;
     }
 
+    /* Chapter export bar below list */
     .ch-export-bar {
       padding: .75rem 1rem;
       border-top: 1px solid var(--border);
@@ -674,6 +661,7 @@
       text-decoration: none;
     }
 
+    /* ── SCROLLBARS ── */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -712,6 +700,7 @@
       }
     }
 
+    /* ── Publishing Guide modal ── */
     .guide-trigger {
       width: 100%;
       justify-content: flex-start;
@@ -925,22 +914,39 @@
       border: 1px solid var(--border);
     }
 
+
+    /* ── Open-in-Folio button ── */
+
     .folio-btn {
+
       width: 100%;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       gap: .55rem;
+
       padding: .7rem 1rem;
+
       font-size: .88rem;
+
       font-weight: 600;
+
       background: var(--accent);
+
       color: #fff;
+
       border: 1px solid var(--accent2);
+
       border-radius: var(--radius);
+
       cursor: pointer;
+
       transition: background .12s, border-color .12s, transform .05s;
+
       box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+
     }
 
     .folio-btn:hover {
@@ -958,66 +964,96 @@
     }
 
     .folio-btn-sub {
+
       display: block;
+
       font-size: .66rem;
+
       font-weight: 400;
+
       color: var(--text3);
+
       margin-top: .35rem;
+
       text-align: center;
+
       line-height: 1.4;
+
     }
 
     .ch-export-divider {
+
       display: flex;
       align-items: center;
       gap: .5rem;
+
       font-size: .65rem;
       color: var(--text3);
+
       text-transform: uppercase;
       letter-spacing: .08em;
+
       margin: .55rem 0 .1rem;
+
     }
 
     .ch-export-divider::before,
     .ch-export-divider::after {
+
       content: '';
       flex: 1;
       height: 1px;
       background: var(--border);
+
     }
   </style>
+
+  <!-- Branding / PWA -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3d6b50">
-  <script>
-    const savedTheme = localStorage.getItem('gutenberg_theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-  </script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gutenberg Cleaner">
+  <meta name="description"
+    content="Fetch any Project Gutenberg book, strip license/header/footer, split into clean chapters, and export as a manuscript (.md), .txt, or .rtf — ready for Folio, Reedsy, Scrivener, or any ebook pipeline.">
+  <meta property="og:title" content="Gutenberg Text Cleaner">
+  <meta property="og:description"
+    content="Turn any Project Gutenberg link into clean, split chapters ready for publishing.">
+  <meta property="og:image" content="icon-512.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
 </head>
 
 <body>
 
   <header class="app-header">
     <div style="display:flex;align-items:center;gap:.7rem">
+      <img src="favicon.svg" alt="" width="28" height="28" style="display:block;border-radius:6px;flex-shrink:0">
       <h1>Gutenberg <em>Text Cleaner</em></h1>
     </div>
-    <div style="display:flex;align-items:center;gap:1.25rem">
-      <span class="header-tag">Chapter Splitter &amp; Exporter</span>
-      <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme">
-        <!-- Icon injected by JS -->
-      </button>
-    </div>
+    <span class="header-tag">Chapter Splitter &amp; Exporter</span>
   </header>
 
   <div class="app-body">
+
+    <!-- ── SIDEBAR ── -->
     <aside class="sidebar">
       <div class="sidebar-scroll">
+        <button class="btn guide-trigger" onclick="openGuide()"
+          title="Step-by-step guide from Gutenberg link to published book / audiobook">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          Publishing Guide
+          <small>link → sellable book</small>
+        </button>
+
+        <!-- Step 1: URL -->
         <div class="step-block">
           <div class="step-head">
             <div class="step-num">1</div>
@@ -1025,55 +1061,94 @@
           </div>
           <label class="field-lbl">Book URL (any Gutenberg link format)</label>
           <input type="url" id="urlInput" placeholder="https://www.gutenberg.org/ebooks/84" oninput="onUrlInput()">
-          <button class="btn btn-primary" id="fetchBtn" onclick="doFetch()">Fetch &amp; Clean</button>
+          <a class="open-link hidden" id="openLink" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            <div style="flex:1;min-width:0">
+              <div class="ol-main">Open plain-text file</div>
+              <div class="ol-url" id="openLinkUrl"></div>
+            </div>
+          </a>
+          <button class="btn btn-primary" id="fetchBtn" onclick="doFetch()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="8 17 12 21 16 17" />
+              <line x1="12" y1="12" x2="12" y2="21" />
+              <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+            </svg>
+            Fetch &amp; Clean
+          </button>
+          <div class="note note-info show" style="font-size:.72rem">
+            Tries your <strong>Cloudflare Worker</strong> first (if configured), then direct, then 3 public CORS
+            proxies. Set <code>WORKER_URL</code> in the script for the most reliable fetching.
+          </div>
           <div class="note" id="fetchNote"></div>
+          <a class="license-link" href="https://www.gutenberg.org/policy/permission.html" target="_blank"
+            rel="noopener">&#x1F4DC; Gutenberg's policy on use &amp; publishing &rarr;</a>
         </div>
 
         <div class="or-divider">or paste manually</div>
 
+        <!-- Step 2: Paste -->
         <div class="step-block">
           <div class="step-head">
             <div class="step-num">2</div>
             <div class="step-label">Paste raw text</div>
           </div>
           <label class="field-lbl">Full Gutenberg plain text</label>
-          <textarea id="pasteInput" placeholder="Paste the full .txt content here..."
-            oninput="onPasteInput()"></textarea>
+          <textarea id="pasteInput" placeholder="Paste the full .txt content here…" oninput="onPasteInput()"></textarea>
           <div class="note" id="pasteNote"></div>
           <button class="btn btn-primary" onclick="doCleanPaste()">Clean &amp; Split Chapters</button>
           <div class="note note-err" id="pasteErr"></div>
         </div>
 
+        <!-- Step 3: Options -->
         <div class="step-block">
           <div class="step-head">
             <div class="step-num">3</div>
             <div class="step-label">Options</div>
           </div>
+
           <div class="opt-section-head" style="margin-bottom:.5rem">Cleaning</div>
           <label class="opt-row"><input type="checkbox" id="optH" checked>
-            <div>Remove header</div>
+            <div>Remove header<small>Everything before the text begins</small></div>
           </label>
           <label class="opt-row"><input type="checkbox" id="optF" checked>
-            <div>Remove footer</div>
+            <div>Remove footer<small>License &amp; end-of-file notices</small></div>
           </label>
           <label class="opt-row"><input type="checkbox" id="optP" checked>
-            <div>Remove "Produced by"</div>
+            <div>Remove "Produced by" lines
           </label>
           <label class="opt-row"><input type="checkbox" id="optB" checked>
-            <div>Collapse blank lines</div>
+            <div>Collapse excess blank lines</div>
           </label>
+
           <div class="opt-section-head" style="margin:.6rem 0 .5rem">Chapter splitting</div>
           <label class="opt-row"><input type="checkbox" id="optChapter" checked>
-            <div>Auto-detect chapters</div>
+            <div>Auto-detect chapters<small>Matches CHAPTER I, Chapter 1, PART II, etc.</small></div>
           </label>
           <label class="opt-row"><input type="checkbox" id="optKeepHeading" checked>
-            <div>Include heading</div>
+            <div>Include heading in each chapter file</div>
+          </label>
+
+          <div class="opt-section-head" style="margin:.6rem 0 .5rem">Export</div>
+          <label class="opt-row"><input type="checkbox" id="optRtfBold" checked>
+            <div>Bold chapter headings in RTF<small>Rich text export only</small></div>
+          </label>
+          <label class="opt-row"><input type="checkbox" id="optBookTitle" checked>
+            <div>Include book title in RTF header<small>Added as first line if detected</small></div>
           </label>
         </div>
+
       </div>
     </aside>
 
+    <!-- ── MAIN ── -->
     <div class="main-content">
+
+      <!-- Chapter list -->
       <div class="chapter-list-panel">
         <div class="ch-panel-head">
           <span class="ch-panel-title">Chapters</span>
@@ -1084,42 +1159,95 @@
         </ul>
         <div class="ch-export-bar" id="chExportBar" style="display:none">
           <div class="ch-export-label">Export all chapters</div>
-          <button class="folio-btn" id="folioBtn" onclick="openInFolio()">Open in Folio</button>
+          <button class="folio-btn" id="folioBtn" onclick="openInFolio()"
+            title="Open a brand-new folio named after this book, with chapters already split, ready for cover / intro / audio.">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              <path d="M18 10l4 2-4 2" />
+            </svg>
+            Open in Folio
+          </button>
+          <small class="folio-btn-sub">Creates a new folio from this book &mdash; chapters pre-split, ready for cover,
+            intro, and audiobook.</small>
           <div class="note" id="folioNote"></div>
           <div class="ch-export-divider">or export as file</div>
-          <button class="btn btn-ghost btn-sm" onclick="exportManuscript()">Manuscript (.md)</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportManuscript()"
+            title="One .md file with # before each chapter heading. Drops into Reedsy, Scrivener, Word, etc.">Manuscript
+            (.md)</button>
           <div class="ch-export-btns">
             <button class="btn btn-ghost btn-sm" onclick="exportAll('txt')">All as .txt</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportAll('rtf')">All as .rtf</button>
           </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportAll('zip-txt')" id="zipBtn">Download .zip (txt)</button>
         </div>
       </div>
 
+      <!-- Reader -->
       <div class="reader-panel">
         <div class="reader-toolbar" id="readerToolbar">
           <div class="reader-title" id="readerTitle">No chapter selected</div>
           <div style="display:flex;align-items:center;gap:.75rem;flex-shrink:0">
             <div class="reader-meta" id="readerMeta"></div>
+            <div class="reader-actions">
+              <button class="btn btn-ghost btn-sm" id="expTxtBtn" onclick="exportChapter('txt')" disabled>Export
+                .txt</button>
+              <button class="btn btn-ghost btn-sm" id="expRtfBtn" onclick="exportChapter('rtf')" disabled>Export
+                .rtf</button>
+            </div>
           </div>
         </div>
         <div class="reader-body">
           <div id="readerContent">
             <div class="reader-placeholder">
-              <p><strong>Fetch or paste a Gutenberg book</strong> to preview.</p>
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+              <p><strong>Fetch or paste a Gutenberg book</strong> to split it into chapters and preview them here.</p>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
+  <!-- Publishing Guide modal -->
+  <div id="guideModal" class="guide-modal" role="dialog" aria-modal="true" aria-hidden="true"
+    onclick="closeGuide(event)">
+    <div class="guide-modal-card" onclick="event.stopPropagation()">
+      <div class="guide-modal-head">
+        <h2>Publishing Guide</h2>
+        <button class="guide-close" onclick="closeGuide()" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="guide-modal-body" id="guideBody"></div>
+    </div>
+  </div>
+  <footer class="app-footer">
+    <span>All processing in-browser · nothing sent anywhere</span>
+    <span><a href="https://www.gutenberg.org" target="_blank">Project Gutenberg</a> · <a
+        href="https://www.gutenberg.org/policy/permission.html" target="_blank">License &amp; permissions</a> · <a
+        href="https://github.com" target="_blank">Host on GitHub Pages</a></span>
+  </footer>
+
   <script>
+    /* ─────────────────────────────────────────────
+       State
+    ───────────────────────────────────────────── */
+    // ── Set this after deploying your Cloudflare Worker ──
+    // e.g. 'https://gutenberg-proxy.yourname.workers.dev'
     const WORKER_URL = 'https://gutenberg-proxy.jacobdsiler.workers.dev/';
-    let chapters = [];
+
+    let chapters = [];      // [{title, num, text, words}]
     let activeIdx = -1;
     let bookTitle = '';
     let bookAuthor = '';
-    let bookMetadata = {};
 
+    /* ─────────────────────────────────────────────
+       URL resolution
+    ───────────────────────────────────────────── */
     function resolveTextUrls(raw) {
       raw = raw.trim().replace(/\/$/, '');
       if (/\.txt(\?|#|$)/i.test(raw)) return [raw];
@@ -1137,13 +1265,25 @@
 
     function onUrlInput() {
       const val = document.getElementById('urlInput').value.trim();
+      const link = document.getElementById('openLink');
+      if (!val) { link.classList.add('hidden'); return; }
+      const urls = resolveTextUrls(val);
+      link.href = urls[0];
+      document.getElementById('openLinkUrl').textContent = urls[0];
+      link.classList.remove('hidden');
     }
+
+    /* ─────────────────────────────────────────────
+       Fetch — direct first, then CORS proxy cascade
+    ───────────────────────────────────────────── */
+    const FETCH_BTN_IDLE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg> Fetch &amp; Clean';
 
     async function tryFetch(url, timeoutMs = 18000) {
       const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const t = await res.text();
       if (!t || t.length < 500) throw new Error('Response too short');
+      // Reject obvious HTML error pages
       if (t.trimStart().startsWith('<!') || t.trimStart().startsWith('<html')) throw new Error('Got HTML, not text');
       return t;
     }
@@ -1151,30 +1291,62 @@
     async function doFetch() {
       const raw = document.getElementById('urlInput').value.trim();
       if (!raw) { showNote('fetchNote', 'err', 'Enter a Gutenberg URL first.'); return; }
+
       const btn = document.getElementById('fetchBtn');
-      btn.disabled = true;
+      const setStatus = (msg) => {
+        btn.innerHTML = `<div class="spinner"></div> ${msg}`;
+        btn.disabled = true;
+      };
+      const resetBtn = () => {
+        btn.innerHTML = FETCH_BTN_IDLE;
+        btn.disabled = false;
+      };
+
       showNote('fetchNote', '', '');
       const textUrls = resolveTextUrls(raw);
+
+      // Build attempt list — worker first (if configured), then direct, then public proxies
       const attempts = [];
       for (const u of textUrls) {
-        if (WORKER_URL) attempts.push({ url: `${WORKER_URL.replace(/\/$/, '')}/?url=${encodeURIComponent(u)}` });
-        attempts.push({ url: u });
-        attempts.push({ url: `https://corsproxy.io/?${encodeURIComponent(u)}` });
+        if (WORKER_URL) {
+          attempts.push({ label: 'Fetching via worker…', url: `${WORKER_URL.replace(/\/$/, '')}/?url=${encodeURIComponent(u)}` });
+        }
+        attempts.push({ label: 'Connecting…', url: u });
+        attempts.push({ label: 'Trying proxy 1…', url: `https://corsproxy.io/?${encodeURIComponent(u)}` });
+        attempts.push({ label: 'Trying proxy 2…', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` });
+        attempts.push({ label: 'Trying proxy 3…', url: `https://thingproxy.freeboard.io/fetch/${u}` });
       }
 
       let text = null;
       for (const attempt of attempts) {
-        try { text = await tryFetch(attempt.url); break; } catch (e) { continue; }
+        setStatus(attempt.label);
+        try {
+          text = await tryFetch(attempt.url);
+          break;
+        } catch (e) {
+          continue;
+        }
       }
-      btn.disabled = false;
-      if (!text) { showNote('fetchNote', 'err', 'Fetch attempts failed. Paste below.'); return; }
+
+      resetBtn();
+
+      if (!text) {
+        showNote('fetchNote', 'err',
+          'All fetch attempts failed. Click "Open plain-text file" above → select all → copy → paste in Step 2.');
+        return;
+      }
+
       showNote('fetchNote', 'ok', '✓ Fetched successfully');
       process(text);
     }
 
+    /* ─────────────────────────────────────────────
+       Paste path
+    ───────────────────────────────────────────── */
     function onPasteInput() {
       const t = document.getElementById('pasteInput').value;
-      if (!t.trim()) return;
+      const note = document.getElementById('pasteNote');
+      if (!t.trim()) { note.className = 'note'; return; }
       const w = t.trim().split(/\s+/).length;
       showNote('pasteNote', 'ok', `✓ ${w.toLocaleString()} words pasted`);
     }
@@ -1186,56 +1358,59 @@
       process(raw);
     }
 
+    /* ─────────────────────────────────────────────
+       Core processing
+    ───────────────────────────────────────────── */
     function process(raw) {
       let text = raw;
 
-      // New smart metadata extractor
-      bookMetadata = {};
-      const headerMatch = text.match(/([\s\S]*?)\*\*\* START OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG/i);
-      const headerText = headerMatch ? headerMatch[1] : text.slice(0, 5000);
+      // Detect book title early (before stripping)
+      const titleMatch = text.match(/^Title:\s*(.+)$/m);
+      bookTitle = titleMatch ? titleMatch[1].trim() : '';
+      const authorMatch = text.match(/^Author:\s*(.+)$/m);
+      bookAuthor = authorMatch ? authorMatch[1].trim() : '';
 
-      const lines = headerText.split('\n');
-      let currentKey = null;
-      let currentValue = '';
-
-      for (let line of lines) {
-        const match = line.match(/^([A-Za-z\s]+):\s*(.*)/);
-        if (match) {
-          if (currentKey) bookMetadata[currentKey] = currentValue.trim().replace(/\s+/g, ' ');
-          currentKey = match[1].trim().toLowerCase().replace(/\s+/g, '_');
-          currentValue = match[2] + ' ';
-        } else if (currentKey && (line.startsWith(' ') || line.startsWith('\t'))) {
-          currentValue += line.trim() + ' ';
-        }
-      }
-      if (currentKey) bookMetadata[currentKey] = currentValue.trim().replace(/\s+/g, ' ');
-
-      bookTitle = bookMetadata['title'] || '';
-      bookAuthor = bookMetadata['author'] || '';
-
+      // ── Strip header ──
       if (document.getElementById('optH').checked) {
         const hm = text.match(/\*{3}\s*START OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG[^\n]*/i);
         if (hm) {
           text = text.slice(hm.index + hm[0].length);
           const nl = text.indexOf('\n'); if (nl !== -1) text = text.slice(nl + 1);
+        } else {
+          const lines = text.split('\n');
+          let si = 0, blanks = 0;
+          for (let i = 0; i < lines.length; i++) {
+            blanks = lines[i].trim() === '' ? blanks + 1 : 0;
+            if (blanks >= 2) { si = i + 1; break; }
+          }
+          text = lines.slice(si).join('\n');
         }
       }
 
+      // ── Strip footer ──
       if (document.getElementById('optF').checked) {
-        const fps = [/\*{3}\s*END OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG/i, /End of (?:the |this )?Project Gutenberg/i];
-        for (const p of fps) { const m = text.match(p); if (m) { text = text.slice(0, m.index); break; } }
+        const fps = [
+          /\*{3}\s*END OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG/i,
+          /End of (?:the |this )?Project Gutenberg/i,
+        ];
+        for (const p of fps) {
+          const m = text.match(p); if (m) { text = text.slice(0, m.index); break; }
+        }
       }
 
+      // ── Remove produced-by ──
       if (document.getElementById('optP').checked) {
         text = text.replace(/^[ \t]*(Produced|Transcribed|Prepared|Digitized) by[^\n]*(\n[^\n]+){0,2}\n?/gim, '');
       }
 
+      // ── Collapse blanks ──
       if (document.getElementById('optB').checked) {
         text = text.replace(/\n{4,}/g, '\n\n\n');
       }
 
       text = text.trim();
 
+      // ── Split into chapters ──
       if (document.getElementById('optChapter').checked) {
         chapters = splitChapters(text);
       } else {
@@ -1246,25 +1421,70 @@
       if (chapters.length > 0) selectChapter(0);
     }
 
+    /* ─────────────────────────────────────────────
+       Chapter splitting — Contents-first, flexible matching
+    ───────────────────────────────────────────── */
+
+    // Shared regex building blocks for heading detection.
+    const HEADING_KEYWORD_SRC = '(?:CHAPTER|CHAP|PART|BOOK|SECTION|ACT|SCENE|VOLUME|VOL|LETTER|CANTO|STAVE|PROLOGUE|EPILOGUE|INTRODUCTION|PREFACE|APPENDIX|FOREWORD|AFTERWORD)';
+    const HEADING_NUMBER_SRC = '(?:[IVXLCDM]+|[0-9]{1,4}|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE|THIRTEEN|FOURTEEN|FIFTEEN|SIXTEEN|SEVENTEEN|EIGHTEEN|NINETEEN|TWENTY|THIRTY|FORTY|FIFTY|FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINTH|TENTH|ELEVENTH|TWELFTH)';
+
+    function reEsc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function flexWs(s) { return reEsc(s).replace(/\s+/g, '\\s+'); }
+
+    // ── 1. Extract titles from a CONTENTS / TABLE OF CONTENTS block ──
+    // Also returns the line index where the TOC block ends, so body-scanning
+    // can skip past it rather than re-matching the TOC entries themselves.
     function extractContents(text) {
       const lines = text.split('\n');
+
       let contentsLine = -1;
       for (let i = 0; i < lines.length; i++) {
-        if (/^[ \t]*(?:TABLE OF )?CONTENTS[ \t]*\.?[ \t]*$/i.test(lines[i])) { contentsLine = i; break; }
+        if (/^[ \t]*(?:TABLE OF )?CONTENTS[ \t]*\.?[ \t]*$/i.test(lines[i])) {
+          contentsLine = i;
+          break;
+        }
       }
       if (contentsLine === -1) return null;
 
       const titles = [];
-      let foundAny = false, blankRun = 0, lastEntryLine = contentsLine;
+      let foundAny = false;
+      let blankRun = 0;
+      let lastEntryLine = contentsLine;
 
       const limit = Math.min(lines.length, contentsLine + 250);
       for (let i = contentsLine + 1; i < limit; i++) {
         const trimmed = lines[i].trim();
-        if (!trimmed) { blankRun++; if (foundAny && blankRun >= 2) break; continue; }
+
+        if (!trimmed) {
+          blankRun++;
+          if (foundAny && blankRun >= 2) break;
+          continue;
+        }
         blankRun = 0;
+
+        // Stop if we hit body-looking prose.
         if (foundAny && trimmed.length > 120 && !/^[A-Z\d]/.test(trimmed)) break;
-        const entry = trimmed.replace(/[\s.·]+\d+\s*$/, '').replace(/\s{2,}\d+\s*$/, '').trim();
-        if (!entry || /^(?:TABLE OF )?CONTENTS$/i.test(entry)) continue;
+
+        // Strip trailing page numbers like "  12" or " .... 12"
+        const entry = trimmed
+          .replace(/[\s.·]+\d+\s*$/, '')
+          .replace(/\s{2,}\d+\s*$/, '')
+          .trim();
+
+        if (!entry) continue;
+        if (/^(?:TABLE OF )?CONTENTS$/i.test(entry)) continue;
+
+        // Single-line contents like "Letter 1  Letter 2  ..."
+        if (!foundAny && /\s{2,}/.test(entry)) {
+          const parts = entry.split(/\s{2,}/).map(s => s.trim()).filter(Boolean);
+          if (parts.length >= 2 && parts.every(p => p.length < 80)) {
+            parts.forEach(p => titles.push(p));
+            foundAny = true;
+            lastEntryLine = i;
+            continue;
+          }
+        }
 
         if (entry.length < 150) {
           titles.push(entry);
@@ -1277,98 +1497,306 @@
       return { titles, tocEndLineIdx: lastEntryLine + 1 };
     }
 
+    // ── 2. Parse a TOC entry into { keyword, number, title } parts ──
+    // Any part may be null.  Handles:
+    //   "CHAPTER I. THE RIVER BANK"  → kw=CHAPTER, num=I,   title=THE RIVER BANK
+    //   "CHAPTER I"                  → kw=CHAPTER, num=I,   title=null
+    //   "I. The River Bank"          → kw=null,    num=I,   title=The River Bank
+    //   "The River Bank"             → kw=null,    num=null, title=The River Bank
+    //   "PROLOGUE"                   → kw=PROLOGUE, num=null, title=null
     function parseTocEntry(entry) {
-      return { keyword: null, number: null, title: entry, raw: entry };
+      const e = entry.trim();
+      const SEP = '[\\s.:\u2014\u2013\\-]';   // space, dot, colon, em/en dash, hyphen
+      let m;
+
+      m = new RegExp('^(' + HEADING_KEYWORD_SRC + ')\\b[\\s.]*(?:(' + HEADING_NUMBER_SRC + ')\\b)?' + SEP + '*(.*)$', 'i').exec(e);
+      if (m) {
+        const title = (m[3] || '').trim().replace(new RegExp('^' + SEP + '+'), '');
+        return { keyword: m[1], number: m[2] || null, title: title || null, raw: e };
+      }
+      m = new RegExp('^(' + HEADING_NUMBER_SRC + ')\\b' + SEP + '+(.+)$', 'i').exec(e);
+      if (m) return { keyword: null, number: m[1], title: m[2].trim(), raw: e };
+      m = new RegExp('^(' + HEADING_NUMBER_SRC + ')\\s*\\.?\\s*$', 'i').exec(e);
+      if (m) return { keyword: null, number: m[1], title: null, raw: e };
+      return { keyword: null, number: null, title: e, raw: e };
     }
 
+    // ── 3. Build candidate heading matchers for a parsed TOC entry ──
+    // Ordered most-specific → least-specific.  Each matcher returns
+    // { span: 1|2 } when it fires (how many lines the body heading occupies).
+    function buildHeadingMatchers(parsed) {
+      const { keyword, number, title } = parsed;
+      const kw = keyword ? flexWs(keyword) : null;
+      const nm = number ? flexWs(number) : null;
+      const tl = title ? flexWs(title) : null;
+      const SEP = '[\\s.:\u2014\u2013\\-]';
+      const matchers = [];
+
+      // (a) one line: KEYWORD NUMBER[sep] TITLE
+      if (kw && nm && tl) {
+        const re = new RegExp('^' + kw + '\\s+' + nm + SEP + '+' + tl + '\\s*$', 'i');
+        matchers.push({ span: 1, test: (l1) => re.test(l1) });
+      }
+      // (b) two lines: "KEYWORD NUMBER" / "TITLE"
+      if (kw && nm && tl) {
+        const r1 = new RegExp('^' + kw + '\\s+' + nm + '\\s*' + SEP + '?\\s*$', 'i');
+        const r2 = new RegExp('^' + tl + '\\s*$', 'i');
+        matchers.push({ span: 2, test: (l1, l2) => r1.test(l1) && l2 != null && r2.test(l2) });
+      }
+      // (c) two lines: "NUMBER" / "TITLE" ← Wind-in-the-Willows style
+      if (nm && tl) {
+        const r1 = new RegExp('^' + nm + '\\s*[.:]?\\s*$', 'i');
+        const r2 = new RegExp('^' + tl + '\\s*$', 'i');
+        matchers.push({ span: 2, test: (l1, l2) => r1.test(l1) && l2 != null && r2.test(l2) });
+      }
+      // (d) one line: NUMBER[sep] TITLE (keyword elided from body)
+      if (nm && tl) {
+        const re = new RegExp('^' + nm + SEP + '+' + tl + '\\s*$', 'i');
+        matchers.push({ span: 1, test: (l1) => re.test(l1) });
+      }
+      // (e) one line: KEYWORD NUMBER (no title)
+      if (kw && nm) {
+        const re = new RegExp('^' + kw + '\\s+' + nm + '\\s*' + SEP + '?\\s*$', 'i');
+        matchers.push({ span: 1, test: (l1) => re.test(l1) });
+      }
+      // (f) one line: NUMBER alone ("I." or "1")
+      if (nm) {
+        const re = new RegExp('^' + nm + '\\s*[.:]?\\s*$', 'i');
+        matchers.push({ span: 1, test: (l1) => re.test(l1) });
+      }
+      // (g) one line: KEYWORD alone ("PROLOGUE")
+      if (kw && !nm) {
+        const re = new RegExp('^' + kw + '\\s*[.:]?\\s*$', 'i');
+        matchers.push({ span: 1, test: (l1) => re.test(l1) });
+      }
+      // (h) one line: TITLE alone — least specific, only when no kw/nm
+      if (tl && !nm && !kw) {
+        const re = new RegExp('^' + tl + '\\s*$', 'i');
+        matchers.push({ span: 1, test: (l1) => re.test(l1) });
+      }
+
+      return matchers;
+    }
+
+    // ── 4. Locate each TOC entry in the body and build chapters ──
     function splitByContents(text, toc) {
       const { titles, tocEndLineIdx } = toc;
       const parsed = titles.map(parseTocEntry);
       const lines = text.split('\n');
+
       let searchFrom = Math.min(lines.length, tocEndLineIdx);
       const hits = [];
 
       for (let ei = 0; ei < parsed.length; ei++) {
+        const matchers = buildHeadingMatchers(parsed[ei]);
+        if (!matchers.length) continue;
+
         let found = null;
-        const re = new RegExp('^' + parsed[ei].title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i');
+
         for (let i = searchFrom; i < lines.length; i++) {
-          if (re.test(lines[i].trim())) {
-            found = { entryIdx: ei, startLine: i, span: 1 };
-            break;
+          const l1 = lines[i].trim();
+          if (!l1) continue;
+
+          const prevBlank = i === 0 || lines[i - 1].trim() === '';
+          if (!prevBlank) continue;
+
+          let j = i + 1;
+          while (j < lines.length && lines[j].trim() === '') j++;
+          const gap = j - (i + 1);
+          const l2raw = j < lines.length ? lines[j].trim() : '';
+
+          for (const m of matchers) {
+            if (m.span === 1) {
+              if (m.test(l1)) {
+                const next = lines[i + 1] !== undefined ? lines[i + 1].trim() : '';
+                if (next === '') found = { entryIdx: ei, startLine: i, span: 1 };
+                break;
+              }
+            } else {
+              if (gap <= 1 && m.test(l1, l2raw)) {
+                const afterJ = j + 1 < lines.length ? lines[j + 1].trim() : '';
+                if (afterJ === '') found = { entryIdx: ei, startLine: i, span: (j - i) + 1 };
+                break;
+              }
+            }
           }
+
+          if (found) break;
         }
-        if (found) { hits.push(found); searchFrom = found.startLine + found.span; }
+
+        if (found) {
+          hits.push(found);
+          searchFrom = found.startLine + found.span;
+        }
       }
 
       if (hits.length < 2) return null;
 
       const result = [];
+      const firstStart = hits[0].startLine;
+      if (firstStart > 0) {
+        const before = lines.slice(0, firstStart).join('\n').trim();
+        if (before.length > 100) {
+          result.push({ title: 'Front Matter', num: 0, text: before, words: countWords(before) });
+        }
+      }
+
       const keepHeading = document.getElementById('optKeepHeading').checked;
 
       for (let h = 0; h < hits.length; h++) {
         const hit = hits[h];
         const next = hits[h + 1];
-        const chunkLines = lines.slice(hit.startLine, next ? next.startLine : lines.length);
-        const body = (keepHeading ? chunkLines.join('\n') : chunkLines.slice(hit.span).join('\n')).trim();
+        const startLine = hit.startLine;
+        const endLine = next ? next.startLine : lines.length;
+        const chunkLines = lines.slice(startLine, endLine);
+
+        const body = (keepHeading
+          ? chunkLines.join('\n')
+          : chunkLines.slice(hit.span).join('\n')
+        ).trim();
+
         if (body.length < 10) continue;
-        result.push({ title: parsed[hit.entryIdx].raw, num: h + 1, text: body, words: countWords(body) });
+
+        result.push({
+          title: parsed[hit.entryIdx].raw,
+          num: h + 1,
+          text: body,
+          words: countWords(body),
+        });
       }
 
       return result.length >= 2 ? result : null;
     }
 
+    // ── 5. Fallback: regex-based heading detection (no usable TOC) ──
+    // Handles three shapes, each surrounded by blank lines:
+    //   (A) "CHAPTER I. THE RIVER BANK"        (one line)
+    //   (B) "CHAPTER I" / "THE RIVER BANK"     (two adjacent lines)
+    //   (C) "I." / "THE RIVER BANK"            (two adjacent lines, keyword elided)
     function splitByRegex(text) {
       const lines = text.split('\n');
+      const SEP = '[\\s.:\u2014\u2013\\-]';
+
+      const KW_FULL_RE = new RegExp('^' + HEADING_KEYWORD_SRC + '\\b[\\s.]*(?:' + HEADING_NUMBER_SRC + '\\b)?' + SEP + '*[^\\n]{0,100}$', 'i');
+      const KW_NUM_RE = new RegExp('^' + HEADING_KEYWORD_SRC + '\\b\\s*(?:' + HEADING_NUMBER_SRC + '\\b)?\\s*' + SEP + '?\\s*$', 'i');
+      const NUM_RE = new RegExp('^' + HEADING_NUMBER_SRC + '\\s*[.:]?\\s*$', 'i');
+      // Partner title line: short, uppercase-leading, no lowercase prose-run.
+      const TITLE_LINE_RE = /^[\"'\u2018\u2019\u201C\u201D(]?[A-Z][A-Z0-9 ,.;:!?'"\u2018\u2019\u201C\u201D()&/\-\u2013\u2014]{2,120}$/;
+
       const heads = [];
 
       for (let i = 0; i < lines.length; i++) {
         const l1 = lines[i].trim();
         if (!l1) continue;
-        if (/^(CHAPTER|CHAP|PART|BOOK)\b[^\n]{0,100}$/i.test(l1)) heads.push({ startLine: i, span: 1 });
+
+        const prevBlank = i === 0 || lines[i - 1].trim() === '';
+        if (!prevBlank) continue;
+
+        const next = lines[i + 1] !== undefined ? lines[i + 1].trim() : '';
+        const after = lines[i + 2] !== undefined ? lines[i + 2].trim() : '';
+
+        if (KW_FULL_RE.test(l1) && next === '') {
+          heads.push({ startLine: i, span: 1 });
+          continue;
+        }
+        if (KW_NUM_RE.test(l1) && next && TITLE_LINE_RE.test(next) && after === '') {
+          heads.push({ startLine: i, span: 2 });
+          continue;
+        }
+        if (NUM_RE.test(l1) && next && TITLE_LINE_RE.test(next) && after === '') {
+          heads.push({ startLine: i, span: 2 });
+          continue;
+        }
       }
 
       if (heads.length < 2) return null;
 
       const result = [];
+      const firstStart = heads[0].startLine;
+      if (firstStart > 0) {
+        const before = lines.slice(0, firstStart).join('\n').trim();
+        if (before.length > 100) {
+          result.push({ title: 'Front Matter', num: 0, text: before, words: countWords(before) });
+        }
+      }
+
       const keepHeading = document.getElementById('optKeepHeading').checked;
 
       for (let h = 0; h < heads.length; h++) {
         const hit = heads[h];
         const next = heads[h + 1];
-        const chunkLines = lines.slice(hit.startLine, next ? next.startLine : lines.length);
-        const body = (keepHeading ? chunkLines.join('\n') : chunkLines.slice(hit.span).join('\n')).trim();
+        const startLine = hit.startLine;
+        const endLine = next ? next.startLine : lines.length;
+        const chunkLines = lines.slice(startLine, endLine);
+        const headingLines = chunkLines.slice(0, hit.span).map(s => s.trim()).filter(Boolean);
+        const title = headingLines.join(' — ');
+
+        const body = (keepHeading
+          ? chunkLines.join('\n')
+          : chunkLines.slice(hit.span).join('\n')
+        ).trim();
+
         if (body.length < 10) continue;
-        result.push({ title: chunkLines[0].trim(), num: h + 1, text: body, words: countWords(body) });
+
+        result.push({ title, num: h + 1, text: body, words: countWords(body) });
       }
 
       return result.length >= 2 ? result : null;
     }
 
+    // ── 6. Orchestrator ──
     function splitChapters(text) {
+      // Normalise line endings so downstream regexes can rely on plain \n.
       text = text.replace(/\r\n?/g, '\n');
       const toc = extractContents(text);
       if (toc) {
         const byContents = splitByContents(text, toc);
-        if (byContents) return byContents;
+        if (byContents) {
+          showSplitMethod(`Contents list used — ${byContents.filter(c => c.num > 0).length} sections found`);
+          return byContents;
+        }
       }
 
       const byRegex = splitByRegex(text);
-      if (byRegex) return byRegex;
+      if (byRegex) {
+        showSplitMethod(`No usable Contents list — headings detected automatically (${byRegex.filter(c => c.num > 0).length} chapters)`);
+        return byRegex;
+      }
 
+      showSplitMethod('No chapters detected — returning full text');
       return [{ title: bookTitle || 'Full Text', num: 1, text: text, words: countWords(text) }];
     }
 
+    function showSplitMethod(msg) {
+      for (const id of ['fetchNote', 'pasteNote']) {
+        const el = document.getElementById(id);
+        if (el && el.classList.contains('show')) {
+          el.className = 'note note-ok show';
+          el.textContent = '✓ ' + msg;
+          return;
+        }
+      }
+      const el = document.getElementById('pasteNote');
+      if (el) { el.className = 'note note-ok show'; el.textContent = '✓ ' + msg; }
+    }
+
+    /* ─────────────────────────────────────────────
+       Chapter list UI
+    ───────────────────────────────────────────── */
     function renderChapterList() {
       const list = document.getElementById('chList');
+      const countEl = document.getElementById('chCount');
       const exportBar = document.getElementById('chExportBar');
-      document.getElementById('chCount').textContent = chapters.length;
+
+      countEl.textContent = chapters.length;
       exportBar.style.display = chapters.length ? '' : 'none';
 
       list.innerHTML = '';
       chapters.forEach((ch, i) => {
         const li = document.createElement('li');
         li.className = 'ch-item';
-        li.innerHTML = `<div class="ch-item-inner">
+        li.innerHTML = `
+      <div class="ch-item-inner">
         <div class="ch-item-num">${ch.num === 0 ? 'Preamble' : '#' + ch.num}</div>
         <div class="ch-item-title">${escHtml(ch.title)}</div>
         <div class="ch-item-words">${ch.words.toLocaleString()} words</div>
@@ -1380,16 +1808,200 @@
 
     function selectChapter(idx) {
       activeIdx = idx;
-      document.querySelectorAll('.ch-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+      // Update active state
+      document.querySelectorAll('.ch-item').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
       const ch = chapters[idx];
+      // Toolbar
       document.getElementById('readerTitle').textContent = ch.title;
-      document.getElementById('readerMeta').textContent = `${ch.words.toLocaleString()} words`;
-      document.getElementById('readerContent').innerHTML = `<div class="reader-text">${escHtml(ch.text)}</div>`;
+      document.getElementById('readerMeta').textContent = `${ch.words.toLocaleString()} words · ${ch.text.length.toLocaleString()} chars`;
+      // Enable export buttons
+      document.getElementById('expTxtBtn').disabled = false;
+      document.getElementById('expRtfBtn').disabled = false;
+      // Content
+      const content = document.getElementById('readerContent');
+      content.innerHTML = `<div class="reader-text">${escHtml(ch.text)}</div>`;
+    }
+
+    /* ─────────────────────────────────────────────
+       Export helpers
+    ───────────────────────────────────────────── */
+    function chapterFilename(ch, ext) {
+      const slug = ch.title.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 50);
+      const prefix = ch.num === 0 ? '00-preamble' : String(ch.num).padStart(2, '0');
+      return `${prefix}-${slug}.${ext}`;
+    }
+
+    function toRtf(ch) {
+      const bold = document.getElementById('optRtfBold').checked;
+      const showTitle = document.getElementById('optBookTitle').checked;
+
+      let content = '';
+      if (showTitle && bookTitle) {
+        content += `{\\pard\\sb240\\sa120 {\\b\\fs28 ${rtfEsc(bookTitle)}}\\par}\n`;
+      }
+      if (bold) {
+        content += `{\\pard\\sb240\\sa120 {\\b\\fs24 ${rtfEsc(ch.title)}}\\par}\n`;
+      } else {
+        content += `{\\pard\\sb240\\sa120 {\\fs24 ${rtfEsc(ch.title)}}\\par}\n`;
+      }
+      // Body paragraphs (split on blank lines)
+      const paras = ch.text.split(/\n{2,}/);
+      for (const p of paras) {
+        const line = p.trim().replace(/\n/g, ' ');
+        if (line) content += `{\\pard\\sa120 ${rtfEsc(line)}\\par}\n`;
+      }
+
+      return `{\\rtf1\\ansi\\deff0\n{\\fonttbl{\\f0\\froman\\fcharset0 Times New Roman;}}\n{\\colortbl ;\\red0\\green0\\blue0;}\n\\f0\\fs24\\cf1\n${content}}`;
+    }
+
+    function rtfEsc(s) {
+      return s
+        .replace(/\\/g, '\\\\')
+        .replace(/{/g, '\\{')
+        .replace(/}/g, '\\}')
+        .replace(/[^\x00-\x7F]/g, c => `\\u${c.charCodeAt(0)}?`);
+    }
+
+    function toTxt(ch) {
+      return ch.title + '\n' + '─'.repeat(Math.min(ch.title.length, 60)) + '\n\n' + ch.text;
+    }
+
+    function exportChapter(fmt) {
+      if (activeIdx < 0 || !chapters[activeIdx]) return;
+      const ch = chapters[activeIdx];
+      const content = fmt === 'rtf' ? toRtf(ch) : toTxt(ch);
+      const mime = fmt === 'rtf' ? 'application/rtf' : 'text/plain';
+      download(chapterFilename(ch, fmt), content, mime);
+    }
+
+    function exportAll(fmt) {
+      if (!chapters.length) return;
+
+      if (fmt === 'zip-txt') {
+        // No JSZip available; fall back to sequential download with a small delay
+        chapters.forEach((ch, i) => {
+          setTimeout(() => {
+            download(chapterFilename(ch, 'txt'), toTxt(ch), 'text/plain');
+          }, i * 200);
+        });
+        return;
+      }
+
+      chapters.forEach((ch, i) => {
+        setTimeout(() => {
+          const content = fmt === 'rtf' ? toRtf(ch) : toTxt(ch);
+          const mime = fmt === 'rtf' ? 'application/rtf' : 'text/plain';
+          download(chapterFilename(ch, fmt), content, mime);
+        }, i * 150);
+      });
+    }
+
+    /* ─────────────────────────────────────────────
+       Manuscript (.md) export — single file ready for
+       Reedsy / Folio / Scrivener / Word, etc.
+    ───────────────────────────────────────────── */
+
+    // Strip a duplicate leading heading from a chapter body if one is there.
+    // Needed because optKeepHeading may have left the heading in ch.text; the
+    // manuscript format always synthesises its own `# Heading` line, so we
+    // don't want it twice.  Tolerates one- or two-line body headings.
+    function stripLeadingHeading(body, title) {
+      if (!body) return '';
+      const lines = body.split('\n');
+      let i = 0;
+      while (i < lines.length && lines[i].trim() === '') i++;           // leading blanks
+      if (i >= lines.length) return '';
+
+      const norm = (s) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+      const T = norm(title);
+
+      // Try up to 2 body-heading lines: accept if each is contained in the title
+      // (loosely) and at least one of them actually matches something meaningful.
+      let consumed = 0;
+      for (let k = 0; k < 2 && (i + k) < lines.length; k++) {
+        const L = norm(lines[i + k]);
+        if (!L) break;
+        if (L.length < 2) break;
+        if (T === L || T.includes(L) || L.includes(T)) consumed = k + 1;
+        else break;
+      }
+      if (consumed === 0) return body;
+
+      i += consumed;
+      while (i < lines.length && lines[i].trim() === '') i++;           // trailing blanks after heading
+      return lines.slice(i).join('\n').trim();
+    }
+
+    // Unwrap soft-wrapped paragraphs so each paragraph is ONE long line.
+    // Gutenberg plain-text wraps at ~70 chars; in strict Markdown those are
+    // soft breaks that get joined on render, but naive importers (Folio's
+    // included, at time of writing) treat every \n as a hard paragraph break
+    // and also run keyword heuristics on line starts.  Emitting one-line
+    // paragraphs sidesteps both problems — the file renders the same in any
+    // correct Markdown viewer and imports cleanly everywhere else too.
+    function unwrapParagraphs(body) {
+      if (!body) return '';
+      return body
+        .split(/\n{2,}/)
+        .map(p => p.trim().replace(/\s*\n\s*/g, ' '))
+        .filter(Boolean)
+        .join('\n\n');
+    }
+
+    // Trim the Gutenberg table-of-contents block out of a front-matter body so
+    // only the title-page prose (book title, byline, dedication, epigraph, etc.)
+    // survives.  Folio re-builds its own TOC from chapter headings, so shipping
+    // the raw TOC would just noise up the preamble page.
+    function stripTocBlock(body) {
+      if (!body) return '';
+      const lines = body.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        if (/^[ \t]*(?:TABLE OF )?CONTENTS[ \t]*\.?[ \t]*$/i.test(lines[i])) {
+          return lines.slice(0, i).join('\n').trim();
+        }
+      }
+      return body;
+    }
+
+    function toMd() {
+      const parts = [];
+
+      for (const ch of chapters) {
+        const body = unwrapParagraphs(stripLeadingHeading(ch.text, ch.title)).trim();
+
+        if (ch.num === 0) {
+          // Front matter: label as "# Preamble" so Folio's smartSplit types it
+          // as front-matter automatically, then strip the raw TOC lines out so
+          // only title-page prose survives.
+          const preamble = stripTocBlock(body).trim();
+          if (preamble.length >= 20) {
+            parts.push('# Preamble', '', preamble, '');
+          }
+          continue;
+        }
+
+        parts.push('# ' + ch.title.trim(), '');
+        if (body) parts.push(body, '');
+      }
+
+      // Collapse any run of 3+ blank lines produced by the assembly step.
+      return parts.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
     }
 
     function exportManuscript() {
-      let md = chapters.map(ch => `# ${ch.title}\n\n${ch.text}`).join('\n\n');
-      download('manuscript.md', md, 'text/markdown');
+      if (!chapters.length) return;
+      const content = toMd();
+      const slug = (bookTitle || 'manuscript')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'manuscript';
+      download(slug + '.md', content, 'text/markdown;charset=utf-8');
     }
 
     function download(name, content, mime) {
@@ -1397,10 +2009,16 @@
       a.href = URL.createObjectURL(new Blob([content], { type: mime }));
       a.download = name;
       a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     }
 
+    /* ─────────────────────────────────────────────
+       Utilities
+    ───────────────────────────────────────────── */
     function countWords(t) { return t.trim().split(/\s+/).filter(Boolean).length; }
-    function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function escHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
     function showNote(id, type, msg) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -1409,79 +2027,240 @@
       el.textContent = msg;
     }
 
+
+    /* ─────────────────────────────────────────────
+       Open in Folio — cross-subdomain handoff
+    ───────────────────────────────────────────── */
     const FOLIO_ORIGIN = 'https://folio.jacobsiler.com';
     const FOLIO_IMPORT_URL = FOLIO_ORIGIN + '/?import=pending';
+    const FOLIO_READY_TIMEOUT_MS = 30000;
+    const FOLIO_BTN_IDLE_HTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M18 10l4 2-4 2"/></svg> Open in Folio';
 
-    function updateThemeIcon() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const btn = document.getElementById('themeToggleBtn');
-      if (!btn) return;
-      if (isDark) {
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
-      } else {
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
-      }
+    function extractGutenbergId(raw) {
+      if (!raw) return '';
+      const trimmed = raw.trim();
+      const m = trimmed.match(/(?:ebooks|epub|files|cache\/epub)\/(\d+)/);
+      if (m) return m[1];
+      const m2 = trimmed.match(/^(\d+)$/);
+      if (m2) return m2[1];
+      return '';
     }
 
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('gutenberg_theme', next);
-      updateThemeIcon();
+    function getSourceMetadata() {
+      const raw = (document.getElementById('urlInput') || {}).value || '';
+      if (!raw.trim()) return { sourceUrl: '', gutenbergId: '' };
+      const urls = resolveTextUrls(raw);
+      return {
+        sourceUrl: urls[0] || raw.trim(),
+        gutenbergId: extractGutenbergId(raw),
+      };
     }
-
-    // Initialize icon on load
-    window.addEventListener('DOMContentLoaded', updateThemeIcon);
 
     function openInFolio() {
-      if (!chapters.length) return;
-      const raw = document.getElementById('urlInput').value.trim();
-      let gutenbergId = '';
-      const m = raw.match(/(?:ebooks|epub|files|cache\/epub)\/(\d+)/) || raw.match(/^(\d+)$/);
-      if (m) gutenbergId = m[1];
+      if (!chapters.length) {
+        showNote('folioNote', 'err', 'Process a book first — nothing to send yet.');
+        return;
+      }
 
+      const btn = document.getElementById('folioBtn');
+      const setBusy = (msg) => {
+        btn.innerHTML = '<div class="spinner"></div> ' + msg;
+        btn.disabled = true;
+      };
+      const resetBtn = () => {
+        btn.innerHTML = FOLIO_BTN_IDLE_HTML;
+        btn.disabled = false;
+      };
+
+      const meta = getSourceMetadata();
       const payload = {
         type: 'folio-import-payload',
         source: 'gutenberg-cleaner',
         version: 1,
-        title: bookTitle || 'Untitled',
-        author: bookAuthor || '',
-        manuscriptMd: chapters.map(ch => `# ${ch.title}\n\n${ch.text}`).join('\n\n'),
+        title: (bookTitle || 'Untitled').slice(0, 500),
+        author: (bookAuthor || '').slice(0, 500),
+        manuscriptMd: toMd(),
         metadata: {
-          sourceUrl: raw,
+          sourceUrl: meta.sourceUrl,
           license: 'Public domain (Project Gutenberg trademark stripped)',
-          gutenbergId,
-          ...bookMetadata
+          gutenbergId: meta.gutenbergId,
         },
       };
 
-      const btn = document.getElementById('folioBtn');
-      btn.disabled = true;
-      const popup = window.open(FOLIO_IMPORT_URL, 'folio_import');
+      showNote('folioNote', '', '');
+      setBusy('Opening Folio…');
 
+      const popup = window.open(FOLIO_IMPORT_URL, 'folio_import');
       if (!popup) {
-        showNote('folioNote', 'err', 'Popup blocked. Allow popups to use this feature.');
-        btn.disabled = false;
+        resetBtn();
+        showNote('folioNote', 'err',
+          'Popup blocked. Allow popups for this page and try again, or open Folio manually and use its Import menu.');
         return;
       }
+
+      let delivered = false;
+      let cancelled = false;
 
       const onMessage = (ev) => {
         if (ev.origin !== FOLIO_ORIGIN) return;
         const d = ev.data;
-        if (d && d.type === 'folio-import-ready') {
-          window.removeEventListener('message', onMessage);
+        if (!d || d.type !== 'folio-import-ready' || d.version !== 1) return;
+        window.removeEventListener('message', onMessage);
+        try {
           popup.postMessage(payload, FOLIO_ORIGIN);
-          showNote('folioNote', 'ok', 'Sent to Folio.');
-          btn.disabled = false;
+          delivered = true;
+          resetBtn();
+          showNote('folioNote', 'ok',
+            '✓ Sent to Folio — switch to the new tab to continue.');
+        } catch (e) {
+          resetBtn();
+          showNote('folioNote', 'err',
+            'Could not deliver to Folio: ' + (e.message || 'unknown error') + '.');
         }
       };
+
       window.addEventListener('message', onMessage);
 
       setTimeout(() => {
+        if (delivered || cancelled) return;
+        cancelled = true;
         window.removeEventListener('message', onMessage);
-        btn.disabled = false;
-      }, 10000);
+        resetBtn();
+        showNote('folioNote', 'err',
+          'Folio didn\'t respond within 30 s. If the tab opened, try again; otherwise check that folio.jacobsiler.com is reachable.');
+      }, FOLIO_READY_TIMEOUT_MS);
+    }
+
+    /* ─────────────────────────────────────────────
+       Publishing Guide
+    ───────────────────────────────────────────── */
+
+    // Walkthrough content. Each section has real info where it is known for certain;
+    // publishing-platform specifics should be verified against each platform's own
+    // current documentation before committing to a strategy.
+    const GUIDE_SECTIONS = [
+      {
+        n: 1, title: 'Clean the text', tag: 'done',
+        html: `
+      <p>Paste a Project Gutenberg URL (any format: <code>/ebooks/289</code>, <code>/files/289/289-0.txt</code>, or direct .txt links) and click <strong>Fetch &amp; Clean</strong>. If the fetch fails, click the "Open plain-text file" link, copy the full text, and paste it into Step&nbsp;2 — same result.</p>
+      <p>The cleaner strips the Project Gutenberg header, footer, and "Produced by" lines, then splits the book into chapters using the Contents list when available and a heading-detection fallback otherwise. Review the chapter list — if the split looks wrong, toggle the chapter-detection options and re-process.</p>
+      <p>When you're happy: <strong>Manuscript (.md)</strong> is the format for Folio, Reedsy, Scrivener, and Word; <strong>.txt</strong> / <strong>.rtf</strong> are for external editors if you prefer.</p>
+    `,
+      },
+      {
+        n: 2, title: 'Licensing &amp; fair use', tag: 'done',
+        html: `
+      <p>Project Gutenberg's license gives you two paths:</p>
+      <ul>
+        <li><strong>Keep the "Project Gutenberg" trademark and license block intact:</strong> the full PG license applies to your distribution. You can redistribute freely with attribution requirements.</li>
+        <li><strong>Strip all PG references (what this cleaner does by default):</strong> the underlying text, if it is in the public domain in your jurisdiction, has no restrictions. You can adapt, sell, remix, translate, narrate, illustrate, however you like.</li>
+      </ul>
+      <p>Most Gutenberg books are in the US public domain (published before 1930 as of 2026). Life-plus-70 jurisdictions (EU, UK, most of the rest of the world) depend on the author's death year: e.g. Kenneth Grahame died 1932, so <em>Wind in the Willows</em> has been public domain in those jurisdictions since 2003.</p>
+      <p>Read the official documents before you publish commercially: <a href="https://www.gutenberg.org/policy/permission.html" target="_blank" rel="noopener">Gutenberg permissions policy</a> · <a href="https://www.gutenberg.org/policy/license.html" target="_blank" rel="noopener">Full license text</a> · <a href="https://www.gutenberg.org/help/copyright.html" target="_blank" rel="noopener">Copyright FAQ</a>.</p>
+    `,
+      },
+      {
+        n: 3, title: 'Open in Folio', tag: 'done',
+        html: `
+      <p>Click <strong>Open in Folio</strong> (top of the export bar) and a new tab opens <a href="https://folio.jacobsiler.com" target="_blank" rel="noopener">folio.jacobsiler.com</a>, creates a <strong>brand-new blank folio named after this book</strong>, and imports the manuscript with chapters already split — ready for cover, editor's note, metadata, and audiobook generation.</p>
+      <p>The handoff is a direct browser-to-browser <code>postMessage</code> between the two tabs with origin checks on both ends — no backend, no auth token, no third party. If the popup gets blocked by your browser, allow popups for this site and try again.</p>
+    `,
+      },
+      {
+        n: 4, title: 'Polish the book in Folio', tag: 'wip',
+        html: `
+      <p>Before publishing, Folio lets you add the extras that make this a real edition rather than a verbatim reprint — which matters for both quality and (crucially) for surviving KDP's undifferentiated-content policy.</p>
+      <ul>
+        <li><strong>Cover</strong> — upload your own or use a placeholder. EPUB requires one; every store requires one.</li>
+        <li><strong>Title page &amp; copyright page</strong> — generated from your metadata (publisher, year, license statement).</li>
+        <li><strong>Editor's note or introduction</strong> — optional for personal use, <strong>required</strong> for KDP and strongly advised for any commercial release. Even a two-paragraph editor's note on the book's history and why you're publishing this edition is enough to differentiate it.</li>
+        <li><strong>Metadata</strong> — publisher / imprint name (make one up if you don't have one — e.g. "Siler Editions"), publication year, optional ISBN.</li>
+      </ul>
+    `,
+      },
+      {
+        n: 5, title: 'Audiobook generation', tag: 'wip',
+        html: `
+      <p>Folio's built-in text-to-speech pipeline (Google Cloud TTS + ElevenLabs) produces per-chapter MP3 files with ID3 chapter tags. Cost preview is shown before you commit; pick a voice, generate, preview in the drawer, regenerate chapters you don't like.</p>
+      <p>For personal use or direct sale, the MP3 set is ready to go. For marketplace submission (Section 7), you'll usually need to repackage: <strong>ACX/Audible</strong> wants an M4B with chapter markers, <strong>Findaway</strong> accepts per-chapter MP3s with specific bitrate requirements. Folio can bundle chapters into an M4B; check your platform's current spec sheet for the bitrate details before finalising.</p>
+    `,
+      },
+      {
+        n: 6, title: 'Publish the ebook', tag: 'wip',
+        html: `
+      <p>Three realistic paths:</p>
+      <ul>
+        <li><strong>Amazon KDP (Kindle)</strong> — largest marketplace, strictest rules. Critical: <strong>Amazon rejects "undifferentiated public domain content"</strong> — you cannot just upload a verbatim PG text. You must add meaningful value: a new introduction, annotations, editor's note, illustrations, or a cover designed for this edition. Folio's editor's-note feature is the <em>minimum</em> bar. Accepts DOCX, EPUB, or KPF.</li>
+        <li><strong>Kobo Writing Life · Draft2Digital · Smashwords</strong> — aggregators that push to Apple Books, Barnes &amp; Noble, libraries, etc. Lenient on public-domain reprints but still expect cover + metadata. EPUB.</li>
+        <li><strong>Direct sale (Gumroad, Payhip)</strong> — no platform restrictions, you keep ~95% of revenue, but you handle discovery yourself. Folio already integrates Gumroad for paid releases. EPUB or PDF.</li>
+      </ul>
+      <p>Start direct-sale to validate, then add aggregators for reach; leave KDP for last because the differentiation requirement is the strictest.</p>
+    `,
+      },
+      {
+        n: 7, title: 'Publish the audiobook', tag: 'wip',
+        html: `
+      <p>Three paths, each with different rules on AI narration — this area is moving fast, always re-verify before committing:</p>
+      <ul>
+        <li><strong>ACX</strong> (Audible + Apple Books) — the largest audiobook marketplace. Historically required human narration; AI-narration rules are evolving. Offers exclusive (40% royalty) vs. non-exclusive (25%). Technical spec is fussy: M4B with chapter markers, 192kbps+ CBR MP3 internals, each chapter under 120 minutes, retail-sample required.</li>
+        <li><strong>Findaway Voices</strong> — distributes to Audible, Apple, Google Play, Kobo, Scribd, libraries, and more. Generally more permissive on AI narration. Per-project fee, then royalties.</li>
+        <li><strong>Direct sale (Gumroad, Payhip, your own site)</strong> — unlimited format freedom, keep most of the revenue, handle distribution yourself. Works well if you have any audience.</li>
+      </ul>
+      <p>Verify each platform's current AI-narration policy before uploading. Policies have changed multiple times in 2024-2026 and will keep moving.</p>
+    `,
+      },
+      {
+        n: 8, title: 'Legal loose ends', tag: 'wip',
+        html: `
+      <ul>
+        <li><strong>ISBN</strong> — NOT required for Amazon KDP (Amazon assigns a free ASIN). Required for most other channels if you want store placement. Each format (print, ebook, audiobook) needs its own ISBN. In the US, buy from <a href="https://www.myidentifiers.com" target="_blank" rel="noopener">Bowker</a> (≈ $125 for one, $295 for ten). Other countries have national agencies (UK: Nielsen, Canada: free via Library and Archives Canada).</li>
+        <li><strong>Publisher / imprint name</strong> — just invent one (e.g. "Siler Editions"). No registration needed in most jurisdictions, but check local requirements if you scale commercially.</li>
+        <li><strong>Tax identifier</strong> — every platform that pays royalties needs a tax ID. In the US, an <a href="https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online" target="_blank" rel="noopener">EIN</a> is free from the IRS and keeps your SSN off royalty paperwork.</li>
+        <li><strong>Rights</strong> — the original text being public-domain means you can use it; any new content you add (cover, intro, annotations, narration) is under your own copyright automatically, no registration needed in most Berne Convention countries, but US registration helps if you ever need to sue for infringement.</li>
+      </ul>
+      <p class="guide-intro" style="border-top: 1px solid var(--border); padding-top: .8rem; margin-top: 1.2rem; border-bottom: none;"><em>This section and Sections 5–7 are living documents. As you (or the Cleaner's users) work through actual publishing, corrections and platform-specific notes get folded back in here.</em></p>
+    `,
+      },
+    ];
+
+    function openGuide() {
+      const body = document.getElementById('guideBody');
+      const intro = `<div class="guide-intro">This walks you through the full path from a Project Gutenberg URL to a finished, sellable book and audiobook. Sections marked <span class="guide-tag guide-tag-done">done</span> are what this cleaner does today. <span class="guide-tag guide-tag-soon">soon</span> is implemented next. <span class="guide-tag guide-tag-wip">wip</span> is best-effort guidance pending real-world validation.</div>`;
+      body.innerHTML = intro + GUIDE_SECTIONS.map(s => {
+        const tagCls = 'guide-tag guide-tag-' + (s.tag || 'wip');
+        const tagLbl = s.tag === 'done' ? 'done' : s.tag === 'soon' ? 'coming soon' : s.tag === 'wip' ? 'wip' : s.tag;
+        return `<div class="guide-section">
+      <h3><span class="n">${s.n}.</span> ${s.title}<span class="${tagCls}">${tagLbl}</span></h3>
+      ${s.html}
+    </div>`;
+      }).join('');
+      const modal = document.getElementById('guideModal');
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeGuide(e) {
+      // Close only if clicking the backdrop, the close button, or no event (Esc)
+      if (e && e.target && e.target.id !== 'guideModal' && !e.target.classList.contains('guide-close')) return;
+      const modal = document.getElementById('guideModal');
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('guideModal');
+        if (modal && modal.classList.contains('show')) closeGuide();
+      }
+    });
+
+    /* ─────────────────────────────────────────────
+       Service worker registration (PWA installability)
+    ───────────────────────────────────────────── */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => { /* silent */ });
+      });
     }
   </script>
 </body>
