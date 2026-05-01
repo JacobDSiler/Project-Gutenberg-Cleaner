@@ -1762,6 +1762,27 @@
     // Initialize icon on load
     window.addEventListener("DOMContentLoaded", updateThemeIcon);
 
+    function stripChapterHeading(text) {
+      const lines = text.split("\n");
+
+      // Remove leading blank lines
+      while (lines.length && !lines[0].trim()) {
+        lines.shift();
+      }
+
+      // Remove first non-empty line (the chapter heading)
+      if (lines.length) {
+        lines.shift();
+      }
+
+      // Remove blank lines AFTER heading
+      while (lines.length && !lines[0].trim()) {
+        lines.shift();
+      }
+
+      return lines.join("\n");
+    }
+
     function openInFolio() {
       if (!chapters.length) return;
       const raw = document.getElementById("urlInput").value.trim();
@@ -1778,7 +1799,16 @@
         title: bookTitle || "Untitled",
         author: bookAuthor || "",
         manuscriptMd: chapters
-          .map((ch) => `# ${ch.title}\n\n${ch.text}`)
+          .map((ch) => {
+            // Keep front matter exactly as-is
+            if (ch.num === 0) {
+              return `# ${ch.title}\n\n${ch.text}`;
+            }
+
+            // Strip heading + whitespace for actual chapters
+            const cleaned = stripChapterHeading(ch.text);
+            return `# ${ch.title}\n\n${cleaned}`;
+          })
           .join("\n\n"),
         metadata: {
           sourceUrl: raw,
