@@ -1777,6 +1777,17 @@ function openInFolio() {
     },
   };
 
+  // Diagnostic breadcrumb — visible in DevTools so we can confirm what
+  // the cleaner sends.  Title/author empty here = extraction problem;
+  // populated here but blank in Folio = Folio receiver problem.
+  console.log('[gutenberg-cleaner] Open in Folio →', {
+    title: payload.title,
+    author: payload.author,
+    sourceUrl: payload.metadata.sourceUrl,
+    gutenbergId: payload.metadata.gutenbergId,
+    manuscriptMdLength: payload.manuscriptMd.length,
+  });
+
   showNote('folioNote', '', '');
   setBusy('Opening Folio…');
 
