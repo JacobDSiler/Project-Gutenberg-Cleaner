@@ -861,9 +861,9 @@ function resolveTextUrls(raw) {
   if (m) n = m[1];
   else { const m2 = raw.match(/^(\d+)$/); if (m2) n = m2[1]; }
   if (n) return [
+    `https://www.gutenberg.org/cache/epub/${n}/pg${n}.txt`,
     `https://www.gutenberg.org/files/${n}/${n}-0.txt`,
     `https://www.gutenberg.org/files/${n}/${n}.txt`,
-    `https://www.gutenberg.org/cache/epub/${n}/pg${n}.txt`,
   ];
   return [raw];
 }
@@ -966,14 +966,71 @@ function doCleanPaste() {
 /* ─────────────────────────────────────────────
    Core processing
 ───────────────────────────────────────────── */
+/* Fallback title/author scraper for older PG files that lack
+   "Title:" / "Author:" headers.  Reads the title page that immediately
+   follows the *** START OF *** marker. */
+function extractTitleAuthorFallback(text) {
+  const startMatch = text.match(/\*{3}\s*START OF (?:THE |THIS )?(?:PROJECT )?GUTENBERG[^\n]*\*{3}/i);
+  if (!startMatch) return { title: '', author: '' };
+  const after = text.slice(startMatch.index + startMatch[0].length);
+  const lines = after.split(/\r?\n/);
+
+  // Walk past leading blank lines, collect non-blank lines until we reach a
+  // "by ..." line or hit a clear non-title-page signal.
+  let i = 0;
+  while (i < lines.length && !lines[i].trim()) i++;
+
+  const titleLines = [];
+  let authorLine = '';
+
+  for (let take = 0; i < lines.length && take < 12; i++) {
+    const t = lines[i].trim();
+    if (!t) {
+      // Blank line — peek ahead for a "by" line if we already have a title.
+      if (titleLines.length) {
+        let j = i + 1;
+        while (j < lines.length && !lines[j].trim()) j++;
+        if (j < lines.length) {
+          const m = lines[j].trim().match(/^[Bb]y\s+(.+)$/);
+          if (m) { authorLine = m[1].trim(); break; }
+        }
+      }
+      take++;
+      continue;
+    }
+    const byMatch = t.match(/^[Bb]y\s+(.+)$/);
+    if (byMatch) { authorLine = byMatch[1].trim(); break; }
+    // Skip pure-numeric lines (years, page nums) and italics-wrapped notes.
+    if (/^[\d\s.,;:\-—–]+$/.test(t)) { take++; continue; }
+    if (/^_/.test(t) && /_$/.test(t)) { take++; continue; }
+    titleLines.push(t);
+    take++;
+    if (titleLines.length >= 4) break;
+  }
+
+  const title  = titleLines.join(' ').replace(/\s+/g, ' ').replace(/[\s.,;:\-—–]+$/, '').slice(0, 200);
+  const author = authorLine.replace(/[\s.,;:\-—–]+$/, '').slice(0, 200);
+  return { title, author };
+}
+
 function process(raw) {
   let text = raw;
 
-  // Detect book title early (before stripping)
+  // Detect book title/author early (before stripping).  Modern PG files have
+  // explicit "Title:" / "Author:" header lines; older files (the
+  // files/{n}/{n}-0.txt variant) start straight with the *** START *** marker
+  // and put title/author on the title page itself, so we fall back to scraping
+  // the title page when the header lookup misses.
   const titleMatch = text.match(/^Title:\s*(.+)$/m);
   bookTitle = titleMatch ? titleMatch[1].trim() : '';
   const authorMatch = text.match(/^Author:\s*(.+)$/m);
   bookAuthor = authorMatch ? authorMatch[1].trim() : '';
+
+  if (!bookTitle || !bookAuthor) {
+    const fb = extractTitleAuthorFallback(text);
+    if (!bookTitle  && fb.title)  bookTitle  = fb.title;
+    if (!bookAuthor && fb.author) bookAuthor = fb.author;
+  }
 
   // ── Strip header ──
   if (document.getElementById('optH').checked) {
