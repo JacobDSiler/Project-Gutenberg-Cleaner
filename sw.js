@@ -6,7 +6,7 @@
    Bump CACHE_VERSION whenever you change this strategy or need to nuke
    previously-cached shells. */
 
-const CACHE_VERSION = 'gc-v3';
+const CACHE_VERSION = 'gc-v4';
 const SHELL_FILES = [
   './',
   './index.html',

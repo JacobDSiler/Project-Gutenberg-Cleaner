@@ -1721,8 +1721,16 @@ function showNote(id, type, msg) {
 /* ─────────────────────────────────────────────
    Open in Folio — cross-subdomain handoff
 ───────────────────────────────────────────── */
-const FOLIO_ORIGIN = 'https://onfolio.press';
-const FOLIO_IMPORT_URL = FOLIO_ORIGIN + '/?import=pending';
+// Folio's canonical origin is the *www* host (GitHub Pages CNAME =
+// www.onfolio.press; the apex 301s to it, which changes the popup's
+// origin and silently kills postMessage both ways). Open the canonical
+// host directly, but trust both spellings so a future DNS/CNAME flip
+// doesn't break the handshake again.
+const FOLIO_TRUSTED_ORIGINS = [
+  'https://www.onfolio.press',   // canonical — must stay first (used as the URL we open)
+  'https://onfolio.press',       // apex — currently 301s to www
+];
+const FOLIO_IMPORT_URL = FOLIO_TRUSTED_ORIGINS[0] + '/?import=pending';
 const FOLIO_READY_TIMEOUT_MS = 30000;
 const FOLIO_BTN_IDLE_HTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M18 10l4 2-4 2"/></svg> Open in Folio';
 
@@ -1803,12 +1811,15 @@ function openInFolio() {
   let cancelled = false;
 
   const onMessage = (ev) => {
-    if (ev.origin !== FOLIO_ORIGIN) return;
+    if (!FOLIO_TRUSTED_ORIGINS.includes(ev.origin)) return;
     const d = ev.data;
     if (!d || d.type !== 'folio-import-ready' || d.version !== 1) return;
     window.removeEventListener('message', onMessage);
     try {
-      popup.postMessage(payload, FOLIO_ORIGIN);
+      // Reply to the origin that actually pinged us (already vetted
+      // against the trusted list above) — never a hardcoded constant,
+      // so an apex↔www redirect can't desync the two sides again.
+      popup.postMessage(payload, ev.origin);
       delivered = true;
       resetBtn();
       showNote('folioNote', 'ok',
